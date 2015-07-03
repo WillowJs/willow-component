@@ -1,8 +1,22 @@
 var WillowComponent = require('../../index.js');
 describe('willow-component', function() {
+
+	// Some setup code...
+	var Comp = WillowComponent.extend({
+		render: function() {
+			return (<h1>Hello World</h1>);
+		}
+	});
+	var BuiltComp = Comp.build();
+	var compNode = utils.renderIntoDocument(<BuiltComp />);
+
+
 	describe('on', function() {
-		it('should exist', function() {
-			expect(WillowComponent.on).not.to.be.undefined;
+		it('should exist on components', function() {
+			expect(WillowComponent.extend().on).not.to.be.undefined;
+		});
+		it('should exist on nodes', function() {
+			expect(compNode.on).not.to.be.undefined;
 		});
 		it('should return itself for method chaining', function() {
 			var comp = WillowComponent.extend({});
@@ -96,8 +110,11 @@ describe('willow-component', function() {
 	});
 
 	describe('extend', function() {
-		it('should exist', function() {
+		it('should exist on components', function() {
 			expect(WillowComponent.extend).not.to.be.undefined;
+		});
+		it('should not exist on nodes', function() {
+			expect(compNode.extend).to.be.undefined;
 		});
 		it('should return a willow component', function() {
 			var comp = WillowComponent.extend({});

@@ -5,7 +5,7 @@ var underscoreDeepExtend = require('underscore-deep-extend');
 
 _.mixin({deepExtend: underscoreDeepExtend(_)});
 
-function WillowComponent(_contents, _events, isBaseClass) {
+function WillowComponent(_contents, _events) {
 	_contents = _contents || {};
 	_events = _events || {};
 	this.on = function(name, handler) {
@@ -42,6 +42,7 @@ function WillowComponent(_contents, _events, isBaseClass) {
 		if(!newObj.hasOwnProperty('mixins')) {
 			newObj.mixins = [];
 		}
+		var newEvents = _.cloneDeep(_events);
 
 		var found = _.find(newObj.mixins, function(mixin) {
 			return mixin.trigger;
@@ -53,12 +54,9 @@ function WillowComponent(_contents, _events, isBaseClass) {
 			});
 		}
 
-		if(isBaseClass) {
-			return new WillowComponent(newObj);
-		}
 		var newComponent = new WillowComponent(
 			newObj,
-			_events
+			newEvents
 		);
 		return newComponent;
 	};
@@ -169,4 +167,4 @@ function WillowComponent(_contents, _events, isBaseClass) {
 	}
 }
 
-module.exports = new WillowComponent({}, {}, true);
+module.exports = new WillowComponent();
