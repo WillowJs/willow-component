@@ -2,6 +2,8 @@ var WillowError = require('willow-error');
 var validator = require('validator');
 var _ = require('lodash');
 var underscoreDeepExtend = require('underscore-deep-extend');
+var async = require('async');
+var eventRunner = require('./libs/event-runner');
 
 _.mixin({deepExtend: underscoreDeepExtend(_)});
 
@@ -37,7 +39,7 @@ function WillowComponent(_contents, _events) {
 		return this; // for chaining
 	};
 	this.extend = function(contents) {
-		var extendFrom = _.cloneDeep(_contents)
+		var extendFrom = _.cloneDeep(_contents);
 		var newObj = _.deepExtend(extendFrom, contents);
 		if(!newObj.hasOwnProperty('mixins')) {
 			newObj.mixins = [];
@@ -46,7 +48,7 @@ function WillowComponent(_contents, _events) {
 
 		var found = _.find(newObj.mixins, function(mixin) {
 			return mixin.trigger;
-		})
+		});
 		if(!found) {
 			newObj.mixins.push({
 				trigger: trigger,
@@ -76,7 +78,58 @@ function WillowComponent(_contents, _events) {
 			throw 'Peek can only be used in debug mode. Set global.willow_debug = true';
 		}
 		return _contents;
-	}
+	};
+
+	this.toString = function(localOnly) {
+		// Recurse function
+		function recurse(target) {
+			if(_.isFunction(target)) {
+				return target.toString();
+			}
+			else if(_.isArray(target)) {
+				var pieces = [];
+				for(var i=0; i<target.length; i++) {
+					pieces.push(recurse(target[i]));
+				}
+				return '['+pieces.join(',')+']';
+			}
+			else if(_.isObject(target)) {
+				var result = '{';
+				for(var j in target) {
+					result += '\''+j+'\':' + recurse(target[j])+',';
+				}
+				result = result.substring(0, result.length-1) + '}';
+				return result;
+			}
+			else if(_.isString(target)) {
+				return '"'+target.toString()+'"';
+			}
+			else {
+				return target.toString();
+			}
+		}
+
+		var results = '{';
+
+		// Contents
+		results += 'contents: ' + recurse(_contents);
+
+		// Events
+		results += ', events: ';
+		var eventPieces = [];
+		for(var i in _events) {
+			var handlerPieces = [];
+			for(var j in _events[i]) {
+				if(!localOnly || (localOnly && _events[i][j].method.toLowerCase() === 'local')) {
+					handlerPieces.push('\''+j+'\': ' + recurse(_events[i][j]));
+				}
+			}
+			eventPieces.push('\''+i+'\': {'+handlerPieces.join(',') + '}');
+		}
+
+		results += '{' + eventPieces.join(',') + '}}';
+		return results;
+	};
 
 	function validateHandler(handler) {
 		if(!handler.name) {
@@ -149,9 +202,10 @@ function WillowComponent(_contents, _events) {
 		}
 
 		var asyncObj = {};
-		this.willow.events.handlers[eventName].each(function(handler) {
-			asyncObj[handler.get('name')] = eventRunner.call(this, handler, eventObj);
-		});
+		for(var i in this.willow.events.handlers[eventName]) {
+			var handler = this.willow.events.handlers[eventName][i];
+			asyncObj[handler.name] = eventRunner.call(this, handler, eventObj);
+		}
 
 		// Check if the event should bubble asynchronously, if so pass to
 		// parent, otherwise do nothing

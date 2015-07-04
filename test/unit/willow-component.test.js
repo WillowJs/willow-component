@@ -1,4 +1,5 @@
 var WillowComponent = require('../../index.js');
+var TestUtils = require('react/addons').addons.TestUtils;
 describe('willow-component', function() {
 
 	// Some setup code...
@@ -182,6 +183,304 @@ describe('willow-component', function() {
 			var c2 = utils.renderIntoDocument(<Comp2 />);
 
 			expect(c2.willow.events.handlers['test-event']).to.be.undefined;
+		});
+	});
+
+	describe('trigger', function() {
+		// Setup
+		var event1TestSpy = sinon.stub().callsArg(1);			// calls the resolve method
+		var event1AnotherTestSpy = sinon.stub().callsArg(1);	// calls the resolve method
+		var Comp = WillowComponent.extend({
+			render: function() {
+				return (<h1>Hello World</h1>);
+			}
+		})
+		.on('event1', {
+			name: 'event1.test',
+			method: 'local',
+			dependencies: [],
+			run: event1TestSpy
+		})
+		.on('event1', {
+			name: 'event1.anotherTest',
+			method: 'local',
+			dependencies: ['event1.test'],
+			run: event1AnotherTestSpy
+		});
+		var BuiltComp = Comp.build();
+		var compNode = utils.renderIntoDocument(<BuiltComp />);
+
+		// Tests
+		it('should exist', function() {
+			expect(compNode.trigger).not.to.be.undefined;
+		});
+		it('should cause the appropriate event handlers to run', function() {
+			event1TestSpy.reset();
+			event1AnotherTestSpy.reset();
+			compNode.trigger('event1', {prop1: 'hello1'});
+			expect(event1TestSpy.called).to.be.true;
+			expect(event1AnotherTestSpy.calledAfter(event1TestSpy)).to.be.true;
+		});
+		it('handlers should be entended properly', function() {
+			event1TestSpy.reset();
+			event1AnotherTestSpy.reset();
+			var CompExtended = Comp.extend({
+				render: function() {
+					return (<h1>Hello World!</h1>);
+				}
+			}, true);
+			var BuiltCompExtended = CompExtended.build();
+			var compExtendedNode = utils.renderIntoDocument(<BuiltCompExtended />);
+			compExtendedNode.trigger('event1', {prop1: 'hello1'});
+			expect(event1TestSpy.called).to.be.true;
+			expect(event1AnotherTestSpy.called).to.be.true;
+			expect(compExtendedNode.getDOMNode().innerHTML).to.equal('Hello World!');
+		});
+		it('should be able to bubble trigger events to parents asynchronously', function(cb) {
+			var childSpy = sinon.stub().callsArg(1);
+			var parentSpy = sinon.stub().callsArg(1);
+			var ChildComp = WillowComponent.extend({
+				events: {
+					'event1': {
+						bubbles: true,
+						sync: false
+					}
+				},
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: childSpy
+			});
+			var ChildBuild = ChildComp.build();
+
+			var ParentBuild = WillowComponent.extend({
+				render: function() {
+					return (
+						<div>
+							<ChildBuild name="child" trigger={this.trigger} events={{event1: {sync: true}}} />
+						</div>
+					);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: parentSpy
+			})
+			.build();
+
+			var parentNode = utils.renderIntoDocument(<ParentBuild name="parent" />);
+
+			var childNode = TestUtils.findRenderedComponentWithType(parentNode, ChildBuild);
+			childNode.trigger('event1', {hello: 'world'});
+
+			expect(childSpy.called).to.be.true;
+			setTimeout(function() {
+				expect(parentSpy.called).to.be.true;
+				expect(parentSpy.calledAfter(childSpy)).to.be.true;
+				cb();
+			}, 100);
+		});
+		it('should be able to bubble trigger events to parents synchronously', function(cb) {
+			var childSpy = sinon.stub().callsArg(1);
+			var parentSpy = sinon.stub().callsArg(1);
+			var childCalledAt = null;
+			var parentCalledAt = null;
+			var ChildComp = WillowComponent.extend({
+				events: {
+					'event1': {
+						bubbles: true,
+						sync: false
+					}
+				},
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function(e, resolve, reject) {
+					childCalledAt = new Date();
+					setTimeout(function() {
+						childSpy(e, resolve, reject);
+					}, 500);
+				}
+			});
+			var ChildBuild = ChildComp.build();
+
+			var ParentBuild = WillowComponent.extend({
+				render: function() {
+					return (
+						<div>
+							<ChildBuild name="child" trigger={this.trigger} events={{event1: {sync: true}}} />
+						</div>
+					);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function(e, resolve, reject) {
+					parentCalledAt = new Date();
+					parentSpy(e, resolve, reject);
+				}
+			})
+			.build();
+
+			var parentNode = utils.renderIntoDocument(<ParentBuild name="parent" />);
+
+			var childNode = TestUtils.findRenderedComponentWithType(parentNode, ChildBuild);
+			childNode.trigger('event1', {hello: 'world'});
+
+			setTimeout(function() {
+				expect(childSpy.called).to.be.true;
+				expect(parentSpy.called).to.be.true;
+				expect(parentSpy.calledAfter(childSpy)).to.be.true;
+				expect(parentCalledAt.getTime() - childCalledAt.getTime()).to.be.gte(500);
+				cb();
+			}, 700);
+		});
+
+		it('synchronous events should wait for child to complete before calling parent', function() {
+			var childSpy = sinon.stub();
+			var parentSpy = sinon.stub().callsArg(1);
+			var childCalledAt = null;
+			var parentCalledAt = null;
+			var ChildComp = WillowComponent.extend({
+				events: {
+					'event1': {
+						bubbles: true,
+						sync: false
+					}
+				},
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function(e, resolve, reject) {
+					childSpy();
+					setTimeout(function() {
+						resolve();
+					}, 500);
+				}
+			});
+			var ChildBuild = ChildComp.build();
+
+			var ParentBuild = WillowComponent.extend({
+				render: function() {
+					return (
+						<div>
+							<ChildBuild name="child" trigger={this.trigger} events={{event1: {sync: true}}} />
+						</div>
+					);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function(e, resolve, reject) {
+					parentCalledAt = new Date();
+					parentSpy(e, resolve, reject);
+				}
+			})
+			.build();
+
+			var parentNode = utils.renderIntoDocument(<ParentBuild name="parent" />);
+
+			var childNode = TestUtils.findRenderedComponentWithType(parentNode, ChildBuild);
+			childNode.trigger('event1', {hello: 'world'});
+
+			expect(childSpy.called).to.be.true;
+			expect(parentSpy.called).to.be.false;
+		});
+	});
+
+	describe('toString', function() {
+		it('should exist', function() {
+			expect(Comp.toString).not.to.be.undefined;
+		});
+		it('should return a valid javascript object', function() {
+			var obj;
+			eval('obj = '+Comp.toString());
+			expect(obj.contents).not.to.be.undefined;
+			expect(obj.contents.render).not.to.be.undefined;
+		});
+		it('should convert events properly', function() {
+			var Comp = WillowComponent.extend({
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function() {
+
+				}
+			})
+			.on('event1', {
+				name: 'event1.anotherTest',
+				method: 'local',
+				dependencies: ['event1.test'],
+				run: function() {
+
+				}
+			});
+
+			var obj;
+			eval('obj = '+Comp.toString());
+			expect(obj.events).not.to.be.undefined;
+			expect(obj.events.event1).not.to.be.undefined;
+			expect(obj.events.event1['event1.test']).not.to.be.undefined;
+			expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
+			expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
+		});
+		it('should only should be able to only show local events', function() {
+			var Comp = WillowComponent.extend({
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function() {
+
+				}
+			})
+			.on('event1', {
+				name: 'event1.anotherTest',
+				method: 'post',
+				dependencies: ['event1.test'],
+				run: function() {
+
+				}
+			});
+
+			var obj;
+			eval('obj = '+Comp.toString(true));
+			expect(obj.events).not.to.be.undefined;
+			expect(obj.events.event1).not.to.be.undefined;
+			expect(obj.events.event1['event1.test']).not.to.be.undefined;
+			expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
+			expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
+			expect(obj.events.event1['event1.anothertest']).to.be.undefined;
 		});
 	});
 });
