@@ -585,7 +585,7 @@ describe('willow-component', function() {
 				},
 				'local',
 				function(data) {
-					expect(data.hello).to.equal('world');
+					expect(data.hello).to.deep.equal({ hello: 'world' });
 					done();
 				},
 				function(err) {

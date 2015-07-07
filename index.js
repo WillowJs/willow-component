@@ -107,7 +107,13 @@ function WillowComponent(_contents, _events) {
 
 		return _events[eventName][handler].run(
 			eventObj,
-			resolve,
+			// resolve
+			function(data) {
+				var result = {};
+				result[handler] = data;
+				return resolve(result);
+			},
+			// reject
 			reject
 		);
 	};
