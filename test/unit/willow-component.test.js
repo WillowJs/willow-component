@@ -570,8 +570,8 @@ describe('willow-component', function() {
 					expect(err.id).to.equal('BADCALL');
 					expect(err.params.event).to.equal('baz');
 					expect(err.params.handler).to.equal('hello');
-					expect(err.params.expectedMethod).to.equal('post');
-					expect(err.params.actualMethod).to.equal('local');
+					expect(err.params.expectedMethod).to.equal('local');
+					expect(err.params.actualMethod).to.equal('post');
 					done();
 				}
 			);

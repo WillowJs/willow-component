@@ -73,7 +73,7 @@ function WillowComponent(_contents, _events) {
 		return reactClass;
 	};
 
-	this.run = function(eventName, handler, eventObj, expectedMethod, resolve, reject) {
+	this.run = function(eventName, handler, eventObj, actualMethod, resolve, reject) {
 		eventName = eventName.toLowerCase();
 		if(!_events.hasOwnProperty(eventName)) {
 			return reject(new WillowError(
@@ -91,14 +91,14 @@ function WillowComponent(_contents, _events) {
 				'NOHANDLER'
 			));
 		}
-		if(_events[eventName][handler].method !== expectedMethod.toLowerCase()) {
+		if(_events[eventName][handler].method !== actualMethod.toLowerCase()) {
 			return reject(new WillowError(
 				'run(...) call expected {{expectedMethod}} but {{event}}/{{handler}} has method {{actualMethod}}.',
 				{
 					event: eventName,
 					handler: handler,
-					expectedMethod: expectedMethod,
-					actualMethod: _events[eventName][handler].method
+					expectedMethod: _events[eventName][handler].method,
+					actualMethod: actualMethod
 				},
 				400,
 				'BADCALL'
