@@ -483,4 +483,60 @@ describe('willow-component', function() {
 			expect(obj.events.event1['event1.anothertest']).to.be.undefined;
 		});
 	});
+
+	describe('build', function() {
+		it('should return a react component if we are running on the client', function() {
+			var Comp = WillowComponent.extend({
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function() {
+
+				}
+			})
+			.build();
+
+			var compNode = utils.renderIntoDocument(<Comp />);
+			expect(compNode.getDOMNode).not.to.be.undefined;
+			expect(compNode.props).not.to.be.undefined;
+			expect(compNode.context).not.to.be.undefined;
+			expect(compNode.state).not.to.be.undefined;
+			expect(compNode.refs).not.to.be.undefined;
+		});
+		it('should return a willow component if we are running on the server', function() {
+			var w = GLOBAL.window;
+			delete GLOBAL.window;
+			var Comp = WillowComponent.extend({
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function() {
+
+				}
+			})
+			.build();
+
+			expect(function() {
+				var compNode = utils.renderIntoDocument(<Comp />);
+			}).to.throw('undefined is not a function');
+
+			expect(Comp.on).not.to.be.undefined;
+			expect(Comp.extend).not.to.be.undefined;
+			expect(Comp.build).not.to.be.undefined;
+			expect(Comp.peek).not.to.be.undefined;
+			expect(Comp.toString).not.to.be.undefined;
+
+			GLOBAL.window = w;
+		});
+	});
 });
