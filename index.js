@@ -79,6 +79,45 @@ function WillowComponent(_contents, _events) {
 		return reactClass;
 	};
 
+	this.run = function(eventName, handler, eventObj, expectedMethod, resolve, reject) {
+		eventName = eventName.toLowerCase();
+		if(!_events.hasOwnProperty(eventName)) {
+			return reject(new WillowError(
+				'Component has no event {{event}}.',
+				{event: eventName},
+				404,
+				'NOEVENT'
+			));
+		}
+		if(!_events[eventName].hasOwnProperty(handler)) {
+			return reject(new WillowError(
+				'Component has no handler {{event}}/{{handler}}.',
+				{event: eventName, handler: handler},
+				404,
+				'NOHANDLER'
+			));
+		}
+		if(_events[eventName][handler].method !== expectedMethod.toLowerCase()) {
+			return reject(new WillowError(
+				'run(...) call expected {{expectedMethod}} but {{event}}/{{handler}} has method {{actualMethod}}.',
+				{
+					event: eventName,
+					handler: handler,
+					expectedMethod: expectedMethod,
+					actualMethod: _events[eventName][handler].method
+				},
+				400,
+				'BADCALL'
+			));
+		}
+
+		return _events[eventName][handler].run(
+			eventObj,
+			resolve,
+			reject
+		);
+	};
+
 	this.peek = function() {
 		if(!global.sinon) {
 			throw 'Peek can only be used in debug mode. Set global.willow_debug = true';

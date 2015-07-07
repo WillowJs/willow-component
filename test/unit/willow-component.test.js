@@ -7,6 +7,16 @@ describe('willow-component', function() {
 		render: function() {
 			return (<h1>Hello World</h1>);
 		}
+	})
+	.on('baz', {
+		name: 'hello',
+		dependencies: [],
+		run: function(e, resolve, reject) {
+			var pieces = e.echo.split('-');
+			var obj = {};
+			obj[pieces[0]] = pieces[1];
+			resolve(obj);
+		}
 	});
 	var BuiltComp = Comp.build();
 	var compNode = utils.renderIntoDocument(<BuiltComp />);
@@ -565,6 +575,81 @@ describe('willow-component', function() {
 			expect(Comp2.toString).not.to.be.undefined;
 
 			GLOBAL.window = w;
+		});
+	});
+
+	describe('run', function() {
+		it('should exist', function() {
+			expect(Comp.run).not.to.be.undefined;
+		});
+		it('should reject invalid events', function(done) {
+			Comp.run(
+				'foo',
+				'bar',
+				{},
+				'local',
+				function(data) {},
+				function(err) {
+					expect(err.message).to.equal('Component has no event {{event}}.');
+					expect(err.status).to.equal(404);
+					expect(err.id).to.equal('NOEVENT');
+					expect(err.params.event).to.equal('foo');
+					done();
+				}
+			);
+		});
+		it('should reject invalid handlers', function(done) {
+			Comp.run(
+				'baz',
+				'bar',
+				{},
+				'local',
+				function(data) {},
+				function(err) {
+					expect(err.message).to.equal('Component has no handler {{event}}/{{handler}}.');
+					expect(err.status).to.equal(404);
+					expect(err.id).to.equal('NOHANDLER');
+					expect(err.params.event).to.equal('baz');
+					expect(err.params.handler).to.equal('bar');
+					done();
+				}
+			);
+		});
+		it('should reject invalid methods', function(done) {
+			Comp.run(
+				'baz',
+				'hello',
+				{},
+				'post',
+				function(data) {},
+				function(err) {
+					expect(err.message).to.equal('run(...) call expected {{expectedMethod}} but {{event}}/{{handler}} has method {{actualMethod}}.');
+					expect(err.status).to.equal(400);
+					expect(err.id).to.equal('BADCALL');
+					expect(err.params.event).to.equal('baz');
+					expect(err.params.handler).to.equal('hello');
+					expect(err.params.expectedMethod).to.equal('post');
+					expect(err.params.actualMethod).to.equal('local');
+					done();
+				}
+			);
+		});
+		it('should accept valid methods', function(done) {
+			Comp.run(
+				'baz',
+				'hello',
+				{
+					echo: 'hello-world'
+				},
+				'local',
+				function(data) {
+					expect(data.hello).to.equal('world');
+					done();
+				},
+				function(err) {
+					console.log(err);
+				}
+			);
 		});
 	});
 });
