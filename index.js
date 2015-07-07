@@ -62,10 +62,12 @@ function WillowComponent(_contents, _events) {
 		);
 		return newComponent;
 	};
-	this.build = function() {
+	this.build = function(server) {
 		// If we are being called by the server then just return ourself.
 		// Don't create a react component.
-		if(! (typeof window != 'undefined' && window.document) ) return this;
+		if( server || !(typeof window != 'undefined' && window.document) ) {
+			return this;
+		}
 
 		// @todo there must be a better way of doing this...
 		var reactClass =  React.createClass(_contents);
