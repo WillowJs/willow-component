@@ -594,4 +594,22 @@ describe('willow-component', function() {
 			);
 		});
 	});
+
+	describe('metadata', function() {
+		it('should exist', function() {
+			expect(WillowComponent.extend().metadata).not.to.be.undefined;
+		});
+		it('should return itself for method chaining when passed a function argument', function() {
+			var comp = WillowComponent.extend({});
+			expect(comp.metadata(function(){})).to.equal(comp);
+		});
+		it('should return a metadata object when passed a non-function argument', function() {
+			var comp = WillowComponent.extend({}).metadata(function(test) {
+				return {
+					value: test
+				};
+			});
+			expect(comp.metadata('hello')).to.deep.equal({value: 'hello'});
+		});
+	});
 });

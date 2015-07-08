@@ -7,9 +7,10 @@ var eventRunner = require('./libs/event-runner');
 
 _.mixin({deepExtend: underscoreDeepExtend(_)});
 
-function WillowComponent(_contents, _events) {
+function WillowComponent(_contents, _events, _metadata) {
 	_contents = _contents || {};
 	_events = _events || {};
+	_metadata = _metadata || function(url) { return {}; };
 	this.on = function(name, handler) {
 		name = name.toLowerCase();
 		if(!_events.hasOwnProperty(name)) {
@@ -58,7 +59,8 @@ function WillowComponent(_contents, _events) {
 
 		var newComponent = new WillowComponent(
 			newObj,
-			newEvents
+			newEvents,
+			_metadata
 		);
 		return newComponent;
 	};
@@ -123,6 +125,16 @@ function WillowComponent(_contents, _events) {
 			throw 'Peek can only be used in debug mode. Set global.willow_debug = true';
 		}
 		return _contents;
+	};
+
+	this.metadata = function(fnOrObj) {
+		if(_.isFunction(fnOrObj)) {
+			_metadata = fnOrObj;
+			return this;
+		}
+		else {
+			return _metadata(fnOrObj);
+		}
 	};
 
 	this.toString = function(localOnly) {
