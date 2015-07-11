@@ -1,4 +1,5 @@
 var WillowError = require('willow-error');
+var React = require('react');
 var validator = require('validator');
 var _ = require('lodash');
 var underscoreDeepExtend = require('underscore-deep-extend');
