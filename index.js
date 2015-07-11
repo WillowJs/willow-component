@@ -184,7 +184,7 @@ function WillowComponent(_contents, _events, _metadata) {
 			eventPieces.push('\''+i+'\': {'+handlerPieces.join(',') + '}');
 		}
 
-		results += '{' + eventPieces.join(',') + '}}';
+		results += '{' + eventPieces.join(',') + '}, metadata: '+_metadata.toString()+'}';
 		return results;
 	};
 

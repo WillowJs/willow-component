@@ -459,6 +459,7 @@ describe('willow-component', function() {
 			expect(obj.events.event1['event1.test']).not.to.be.undefined;
 			expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
 			expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
+			expect(obj.metadata).not.to.be.undefined;
 		});
 		it('should only should be able to only show local events', function() {
 			var Comp = WillowComponent.extend({
@@ -491,6 +492,7 @@ describe('willow-component', function() {
 			expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
 			expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
 			expect(obj.events.event1['event1.anothertest']).to.be.undefined;
+			expect(obj.metadata).not.to.be.undefined;
 		});
 	});
 
