@@ -64,6 +64,7 @@ function WillowComponent(_contents, _events, _metadata, _requires) {
 			newObj.mixins = [];
 		}
 		var newEvents = _.cloneDeep(_events);
+		var newRequires = _.cloneDeep(_requires);
 
 		var found = _.find(newObj.mixins, function(mixin) {
 			return mixin.trigger;
@@ -79,7 +80,7 @@ function WillowComponent(_contents, _events, _metadata, _requires) {
 			newObj,
 			newEvents,
 			_metadata,
-			_requires
+			newRequires
 		);
 		return newComponent;
 	};
