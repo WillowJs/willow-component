@@ -614,4 +614,71 @@ describe('willow-component', function() {
 			expect(comp.metadata('hello')).to.deep.equal({value: 'hello'});
 		});
 	});
+
+	describe('require', function() {
+		it('should exist', function() {
+			expect(WillowComponent.require).not.to.be.undefined;
+		});
+		it('should throw and error if no var name is specified', function() {
+			expect(function() {Comp.require()}).to.throw({
+				message: 'A variable name is required',
+				status: 400,
+				id: 'NOVARNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if an invalid var name is specified', function() {
+			expect(function() {Comp.require(true)}).to.throw({
+				message: 'Variable names must be strings',
+				status: 400,
+				id: 'BADVARNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if no module name is specified', function() {
+			expect(function() {Comp.require('hello')}).to.throw({
+				message: 'A module to include must be specified',
+				status: 400,
+				id: 'NOMODNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if an invalid module name is specified', function() {
+			expect(function() {Comp.require('hello', 7)}).to.throw({
+				message: 'Module names must be strings',
+				status: 400,
+				id: 'BADMODNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if no context is specified', function() {
+			expect(function() {Comp.require('hello', 'world')}).to.throw({
+				message: 'A context is require ("client" or "server" or "both")',
+				status: 400,
+				id: 'NOCONTEXT',
+				params: {}
+			});
+		});
+		it('should throw and error if a bad context is specified', function() {
+			expect(function() {Comp.require('hello', 'world', [])}).to.throw({
+				message: 'Context must be a string',
+				status: 400,
+				id: 'BADCONTEXT',
+				params: {}
+			});
+		});
+		it('should throw and error if an invalid context is specified', function() {
+			expect(function() {Comp.require('hello', 'world', [])}).to.throw({
+				message: 'Context must be either "client", "server" or "both"',
+				status: 400,
+				id: 'INVALIDCONTEXT',
+				params: {}
+			});
+		});
+		it('should work when valid params are passed in', function() {
+			expect(Comp.require('foo', 'bar', 'client')).to.be.true;
+			expect(Comp.require('faz', 'boz', 'server')).to.be.true;
+			expect(Comp.require('face', 'book', 'both')).to.be.true;
+		});
+	});
 });

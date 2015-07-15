@@ -8,10 +8,27 @@ var eventRunner = require('./libs/event-runner');
 
 _.mixin({deepExtend: underscoreDeepExtend(_)});
 
-function WillowComponent(_contents, _events, _metadata) {
+function WillowComponent(_contents, _events, _metadata, _requires) {
 	_contents = _contents || {};
 	_events = _events || {};
 	_metadata = _metadata || function(url) { return {}; };
+	_requires = _requires || {
+		client: {},
+		server: {},
+		both: {}
+	};
+	this.require = function(varName, modName, context) {
+		context = context.toLowerCase();
+		var error = validateRequire(varName, modName, context);
+		if(error) {
+			throw error;
+		}
+
+		_requires[context][varName] = modName;
+
+		return true;
+
+	};
 	this.on = function(name, handler) {
 		name = name.toLowerCase();
 		if(!_events.hasOwnProperty(name)) {
@@ -61,7 +78,8 @@ function WillowComponent(_contents, _events, _metadata) {
 		var newComponent = new WillowComponent(
 			newObj,
 			newEvents,
-			_metadata
+			_metadata,
+			_requires
 		);
 		return newComponent;
 	};
@@ -186,8 +204,71 @@ function WillowComponent(_contents, _events, _metadata) {
 		}
 
 		results += '{' + eventPieces.join(',') + '}, metadata: '+_metadata.toString()+'}';
+
 		return results;
 	};
+
+	function validateRequire(varName, modName, context) {
+		if(!varName) {
+			return new WillowError(
+				'A variable name is required',
+				400,
+				'NOVARNAME'
+			);
+		}
+
+		if(!_.isString(varName)) {
+			return new WillowError(
+				'Variable names must be strings',
+				400,
+				'BADVARNAME'
+			);
+		}
+
+		if(!modName) {
+			return new WillowError(
+				'A module to include must be specified',
+				400,
+				'NOMODNAME'
+			);
+		}
+
+		if(!_.isString(modName)) {
+			return new WillowError(
+				'Module names must be strings',
+				400,
+				'BADMODNAME'
+			);
+		}
+
+		if(!context) {
+			return new WillowError(
+				'A context is require ("client" or "server" or "both")',
+				400,
+				'NOCONTEXT'
+			);
+		}
+
+		if(!_.isString(context)) {
+			return new WillowError(
+				'Context must be a string',
+				400,
+				'BADCONTEXT'
+			);
+		}
+
+		context = context.toLowerCase();
+
+		if(!validator.isIn(context, ['client', 'server', 'both'])) {
+			return new WillowError(
+				'Context must be either "client", "server" or "both"',
+				400,
+				'INVALIDCONTEXT'
+			);
+		}
+
+		return false;
+	}
 
 	function validateHandler(handler) {
 		if(!handler.name) {
