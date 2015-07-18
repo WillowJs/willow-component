@@ -18,6 +18,7 @@ function WillowComponent(_contents, _events, _metadata, _requires) {
 		both: {}
 	};
 	this.require = function(varName, modName, context) {
+		// @todo what happens when the component I'm extending from shares a varName
 		context = context.toLowerCase();
 		var error = validateRequire(varName, modName, context);
 		if(error) {
@@ -26,7 +27,7 @@ function WillowComponent(_contents, _events, _metadata, _requires) {
 
 		_requires[context][varName] = modName;
 
-		return true;
+		return this;
 
 	};
 	this.on = function(name, handler) {
@@ -204,7 +205,8 @@ function WillowComponent(_contents, _events, _metadata, _requires) {
 			eventPieces.push('\''+i+'\': {'+handlerPieces.join(',') + '}');
 		}
 
-		results += '{' + eventPieces.join(',') + '}, metadata: '+_metadata.toString()+'}';
+		results += '{' + eventPieces.join(',') + '}, metadata: '+_metadata.toString();
+		results += ', requires: ' + JSON.stringify(_requires) + '}';
 
 		return results;
 	};

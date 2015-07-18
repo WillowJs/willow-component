@@ -435,6 +435,7 @@ describe('willow-component', function() {
 					return (<h1>Hello World</h1>);
 				}
 			})
+			.require('_', 'lodash', 'server')
 			.on('event1', {
 				name: 'event1.test',
 				method: 'local',
@@ -460,6 +461,8 @@ describe('willow-component', function() {
 			expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
 			expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
 			expect(obj.metadata).not.to.be.undefined;
+			expect(obj.requires).not.to.be.undefined;
+			expect(obj.requires.server._).to.equal('lodash');
 		});
 		it('should only should be able to only show local events', function() {
 			var Comp = WillowComponent.extend({
@@ -619,6 +622,10 @@ describe('willow-component', function() {
 		it('should exist', function() {
 			expect(WillowComponent.require).not.to.be.undefined;
 		});
+		it('should return itself for method chaining', function() {
+			var comp = WillowComponent.extend({});
+			expect(comp.require('_', 'lodash', 'server')).to.equal(comp);
+		});
 		it('should throw and error if no var name is specified', function() {
 			expect(function() {Comp.require()}).to.throw({
 				message: 'A variable name is required',
@@ -676,9 +683,9 @@ describe('willow-component', function() {
 			});
 		});
 		it('should work when valid params are passed in', function() {
-			expect(Comp.require('foo', 'bar', 'client')).to.be.true;
-			expect(Comp.require('faz', 'boz', 'server')).to.be.true;
-			expect(Comp.require('face', 'book', 'both')).to.be.true;
+			expect(Comp.require('foo', 'bar', 'client')).to.equal(Comp);
+			expect(Comp.require('faz', 'boz', 'server')).to.equal(Comp);
+			expect(Comp.require('face', 'book', 'both')).to.equal(Comp);
 		});
 	});
 });
