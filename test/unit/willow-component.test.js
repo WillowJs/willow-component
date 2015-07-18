@@ -138,7 +138,7 @@ describe('willow-component', function() {
 				property: 'val',
 				property2: 'a',
 				componentWillMount: function() {
-					this.trigger('render', {});
+					this.trigger('render')({});
 				},
 				render: function() {
 					return React.DOM.h1(null, "Hello, world!");
@@ -227,7 +227,7 @@ describe('willow-component', function() {
 		it('should cause the appropriate event handlers to run', function() {
 			event1TestSpy.reset();
 			event1AnotherTestSpy.reset();
-			compNode.trigger('event1', {prop1: 'hello1'});
+			compNode.trigger('event1')({prop1: 'hello1'});
 			expect(event1TestSpy.called).to.be.true;
 			expect(event1AnotherTestSpy.calledAfter(event1TestSpy)).to.be.true;
 		});
@@ -241,7 +241,7 @@ describe('willow-component', function() {
 			}, true);
 			var BuiltCompExtended = CompExtended.build();
 			var compExtendedNode = utils.renderIntoDocument(<BuiltCompExtended />);
-			compExtendedNode.trigger('event1', {prop1: 'hello1'});
+			compExtendedNode.trigger('event1')({prop1: 'hello1'});
 			expect(event1TestSpy.called).to.be.true;
 			expect(event1AnotherTestSpy.called).to.be.true;
 			expect(compExtendedNode.getDOMNode().innerHTML).to.equal('Hello World!');
@@ -288,7 +288,7 @@ describe('willow-component', function() {
 			var parentNode = utils.renderIntoDocument(<ParentBuild name="parent" />);
 
 			var childNode = TestUtils.findRenderedComponentWithType(parentNode, ChildBuild);
-			childNode.trigger('event1', {hello: 'world'});
+			childNode.trigger('event1')({hello: 'world'});
 
 			expect(childSpy.called).to.be.true;
 			setTimeout(function() {
@@ -349,7 +349,7 @@ describe('willow-component', function() {
 			var parentNode = utils.renderIntoDocument(<ParentBuild name="parent" />);
 
 			var childNode = TestUtils.findRenderedComponentWithType(parentNode, ChildBuild);
-			childNode.trigger('event1', {hello: 'world'});
+			childNode.trigger('event1')({hello: 'world'});
 
 			setTimeout(function() {
 				expect(childSpy.called).to.be.true;
@@ -412,7 +412,7 @@ describe('willow-component', function() {
 			var parentNode = utils.renderIntoDocument(<ParentBuild name="parent" />);
 
 			var childNode = TestUtils.findRenderedComponentWithType(parentNode, ChildBuild);
-			childNode.trigger('event1', {hello: 'world'});
+			childNode.trigger('event1')({hello: 'world'});
 
 			expect(childSpy.called).to.be.true;
 			expect(parentSpy.called).to.be.false;
@@ -699,6 +699,5 @@ describe('willow-component', function() {
 			var comp = WillowComponent.extend({}).require('_', 'lodash', 'client');
 			expect(comp.requires().client._).to.equal('lodash');
 		});
-		
 	});
 });

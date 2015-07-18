@@ -329,42 +329,44 @@ function WillowComponent(_contents, _events, _metadata, _requires) {
 		var self = this;
 		eventName = eventName.toLowerCase();
 
-		function eventComplete(err, data) {
-			eventObj.results = data;
+		return function(eventObj) {
+			function eventComplete(err, data) {
+				eventObj.results = data;
 
-			// Check if the event should bubble synchronously, if so pass to
-			// parent, otherwise do nothing
-			if(self.props.trigger) {
-				if(self.props.events && self.props.events.hasOwnProperty(eventName)) {
-					if(self.props.events[eventName].sync) {
-						self.props.trigger(eventName, eventObj);
+				// Check if the event should bubble synchronously, if so pass to
+				// parent, otherwise do nothing
+				if(self.props.trigger) {
+					if(self.props.events && self.props.events.hasOwnProperty(eventName)) {
+						if(self.props.events[eventName].sync) {
+							self.props.trigger(eventName)(eventObj);
+						}
 					}
 				}
 			}
-		}
 
-		// If there is no event handler then end right here
-		if(!this.willow.events.handlers.hasOwnProperty(eventName)) {
-			return eventComplete(null, {});
-		}
+			// If there is no event handler then end right here
+			if(!self.willow.events.handlers.hasOwnProperty(eventName)) {
+				return eventComplete(null, {});
+			}
 
-		var asyncObj = {};
-		for(var i in this.willow.events.handlers[eventName]) {
-			var handler = this.willow.events.handlers[eventName][i];
-			asyncObj[handler.name] = eventRunner.call(this, handler, eventObj);
-		}
+			var asyncObj = {};
+			for(var i in self.willow.events.handlers[eventName]) {
+				var handler = self.willow.events.handlers[eventName][i];
+				asyncObj[handler.name] = eventRunner.call(self, handler, eventObj);
+			}
 
-		// Check if the event should bubble asynchronously, if so pass to
-		// parent, otherwise do nothing
-		async.auto(asyncObj, eventComplete);
+			// Check if the event should bubble asynchronously, if so pass to
+			// parent, otherwise do nothing
+			async.auto(asyncObj, eventComplete);
 
-		if(this.props.trigger) {
-			if(this.props.events && this.props.events.hasOwnProperty(eventName)) {
-				if(!this.props.events[eventName].sync) {
-					this.props.trigger(eventName, eventObj);
+			if(self.props.trigger) {
+				if(self.props.events && self.props.events.hasOwnProperty(eventName)) {
+					if(!self.props.events[eventName].sync) {
+						self.props.trigger(eventName)(eventObj);
+					}
 				}
 			}
-		}
+		};
 	}
 }
 
