@@ -688,4 +688,17 @@ describe('willow-component', function() {
 			expect(Comp.require('face', 'book', 'both')).to.equal(Comp);
 		});
 	});
+
+	describe('requires', function() {
+		Comp.require('_', 'lodash', 'client');
+
+		it('should exist', function() {
+			expect(WillowComponent.requires).not.to.be.undefined;
+		});
+		it('should return an object with all the required modules', function() {
+			var comp = WillowComponent.extend({}).require('_', 'lodash', 'client');
+			expect(comp.requires().client._).to.equal('lodash');
+		});
+		
+	});
 });

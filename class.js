@@ -30,6 +30,11 @@ function WillowComponent(_contents, _events, _metadata, _requires) {
 		return this;
 
 	};
+
+	this.requires = function() {
+		return _requires;
+	};
+
 	this.on = function(name, handler) {
 		name = name.toLowerCase();
 		if(!_events.hasOwnProperty(name)) {
