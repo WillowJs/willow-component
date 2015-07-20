@@ -171,7 +171,7 @@ function WillowComponent(_contents, _events, _metadata, _requires) {
 			}
 			else if(_.isArray(target)) {
 				var pieces = [];
-				for(var i=0; i<target.length; i++) {
+				for(var i=0; i < target.length; i++) {
 					pieces.push(recurse(target[i]));
 				}
 				return '['+pieces.join(',')+']';
@@ -305,7 +305,7 @@ function WillowComponent(_contents, _events, _metadata, _requires) {
 				'BADDEPS'
 			);
 		}
-		for(var i=0; i<handler.dependencies.length; i++) {
+		for(var i=0; i < handler.dependencies.length; i++) {
 			if(!_.isString(handler.dependencies[i])) {
 				return new WillowError(
 					'All dependencies must be strings',
