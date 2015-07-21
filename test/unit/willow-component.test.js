@@ -629,6 +629,13 @@ describe('willow-component', function() {
 			expect(CompClass.require('faz', 'boz', 'server')).to.equal(CompClass);
 			expect(CompClass.require('face', 'book', 'both')).to.equal(CompClass);
 		});
+		it('should load the proper required modules before the component mounts on the server', function() {
+			var CompClass = Willow.createClass({}).require('_', 'lodash', 'server');
+			var compNode = utils.renderIntoDocument(<CompClass />);
+			expect(compNode.requires).not.to.be.undefined;
+			expect(compNode.requires._).not.to.be.undefined;
+			expect(compNode.requires._.isFunction).not.to.be.undefined;
+		});
 	});
 
 	// describe('requires', function() {

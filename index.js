@@ -36,6 +36,26 @@ function createClass(obj) {
 			this._willow = _.cloneDeep(
 				Object.getPrototypeOf ? Object.getPrototypeOf(this)._willow : this.__proto__._willow
 			);
+
+			var isNode = false;
+			if (typeof process === 'object') {
+				if (typeof process.versions === 'object') {
+					if (process.versions.node !== 'undefined') {
+						isNode = true;
+					}
+				}
+			}
+
+			if (isNode) {
+				this.requires = {};
+				for(var i in this._willow.requires.both) {
+					this.requires[i] = require(this._willow.requires.both[i]);
+				}
+				for(var j in this._willow.requires.server) {
+					this.requires[j] = require(this._willow.requires.server[j]);
+				}
+			}
+
 			this.on = WillowMethods.on();
 			this.trigger = WillowMethods.trigger();
 			this.require = WillowMethods.require();
