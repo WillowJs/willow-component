@@ -185,21 +185,6 @@ describe('willow-component', function() {
 			expect(event1TestSpy.called).to.be.true;
 			expect(event1AnotherTestSpy.calledAfter(event1TestSpy)).to.be.true;
 		});
-		// it('handlers should be entended properly', function() {
-		// 	event1TestSpy.reset();
-		// 	event1AnotherTestSpy.reset();
-		// 	var CompExtended = Comp.extend({
-		// 		render: function() {
-		// 			return (<h1>Hello World!</h1>);
-		// 		}
-		// 	}, true);
-		// 	var BuiltCompExtended = CompExtended.build();
-		// 	var compExtendedNode = utils.renderIntoDocument(<BuiltCompExtended />);
-		// 	compExtendedNode.trigger('event1')({prop1: 'hello1'});
-		// 	expect(event1TestSpy.called).to.be.true;
-		// 	expect(event1AnotherTestSpy.called).to.be.true;
-		// 	expect(compExtendedNode.getDOMNode().innerHTML).to.equal('Hello World!');
-		// });
 		it('should be able to bubble trigger events to parents asynchronously', function(cb) {
 			var childSpy = sinon.stub().callsArg(1);
 			var parentSpy = sinon.stub().callsArg(1);
@@ -239,7 +224,7 @@ describe('willow-component', function() {
 			expect(childSpy.called).to.be.true;
 			setTimeout(function() {
 				expect(parentSpy.called).to.be.true;
-				// expect(parentSpy.calledAfter(childSpy)).to.be.true;
+				expect(parentSpy.calledAfter(childSpy)).to.be.true;
 				cb();
 			}, 100);
 		});
@@ -362,7 +347,6 @@ describe('willow-component', function() {
 	});
 
 	describe('toString', function() {
-		// // Some setup code...
 		var Comp = Willow.createClass({
 			render: function() {
 				return (<h1>Hello World</h1>);
@@ -460,8 +444,6 @@ describe('willow-component', function() {
 	});
 
 	describe('run', function() {
-
-		// // Some setup code...
 		var Comp = Willow.createClass({
 			render: function() {
 				return (<h1>Hello World</h1>);
