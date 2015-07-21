@@ -16,6 +16,21 @@ module.exports = {
 	createClass: createClass
 };
 
+function loadRequires(requires) {
+	var path = require('path');
+	var filePath = '';
+	for(var i in requires) {
+		filePath = requires[i];
+		if(filePath.charAt(0) === '.') {
+			filePath = path.resolve(
+				path.dirname(module.parent.filename),
+				filePath
+			);
+		}
+		this.requires[i] = require(filePath);
+	}
+}
+
 function createClass(obj) {
 
 	obj = obj || {};
@@ -48,12 +63,10 @@ function createClass(obj) {
 
 			if (isNode) {
 				this.requires = {};
-				for(var i in this._willow.requires.both) {
-					this.requires[i] = require(this._willow.requires.both[i]);
-				}
-				for(var j in this._willow.requires.server) {
-					this.requires[j] = require(this._willow.requires.server[j]);
-				}
+				loadRequires.call(this, this._willow.requires.both);
+				loadRequires.call(this, this._willow.requires.server);
+
+				ChildClass.prototype.requires = this.requires;
 			}
 
 			this.on = WillowMethods.on();
