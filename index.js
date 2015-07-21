@@ -23,7 +23,7 @@ function createClass(obj) {
 	// Fill in a render method
 	if(!obj.render) {
 		obj.render = function() {
-			return <h1>No render method implemented</h1>;
+			return React.createElement('h1', {}, 'No render method implemented');
 		};
 	}
 
@@ -66,7 +66,7 @@ function createClass(obj) {
 			ChildClass.prototype.metadata = WillowMethods.metadata(this);
 		},
 		render: function() {
-			return <ChildClass {...this.props} iden="CHILD!!!" />;
+			return React.createElement(ChildClass, this.props);
 		}
 	});
 
