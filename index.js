@@ -42,9 +42,6 @@ function createClass(obj) {
 		};
 	}
 
-	// Build out the child component
-	var ChildClass = React.createClass(obj);
-
 	var ParentClass = React.createClass({
 		componentWillMount: function() {
 			// ... code goes here
@@ -66,19 +63,23 @@ function createClass(obj) {
 				loadRequires.call(this, this._willow.requires.both);
 				loadRequires.call(this, this._willow.requires.server);
 
-				ChildClass.prototype.requires = this.requires;
+				obj.requires = this.requires;
 			}
+
+			// Build out the child component
+			this.ChildClass = React.createClass(obj);
 
 			this.on = WillowMethods.on();
 			this.trigger = WillowMethods.trigger();
 			this.require = WillowMethods.require();
 			this.metadata = WillowMethods.metadata();
-			ChildClass.prototype.on = WillowMethods.on(this);
-			ChildClass.prototype.trigger = WillowMethods.trigger(this);
-			ChildClass.prototype.require = WillowMethods.require(this);
-			ChildClass.prototype.metadata = WillowMethods.metadata(this);
+			this.ChildClass.prototype.on = WillowMethods.on(this);
+			this.ChildClass.prototype.trigger = WillowMethods.trigger(this);
+			this.ChildClass.prototype.require = WillowMethods.require(this);
+			this.ChildClass.prototype.metadata = WillowMethods.metadata(this);
 		},
 		render: function() {
+			var ChildClass = this.ChildClass;
 			return React.createElement(ChildClass, this.props);
 		}
 	});
