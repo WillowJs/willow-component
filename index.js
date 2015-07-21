@@ -42,6 +42,9 @@ function createClass(obj) {
 		};
 	}
 
+	// Build out the child component
+	var ChildClass = React.createClass(obj);
+
 	var ParentClass = React.createClass({
 		componentWillMount: function() {
 			// ... code goes here
@@ -51,11 +54,12 @@ function createClass(obj) {
 
 			var isNode = false;
 			if (typeof process === 'object') {
-				if (typeof process.versions === 'object') {
-					if (process.versions.node !== 'undefined') {
-						isNode = true;
-					}
-				}
+				isNode = !process.browser;
+				// if (typeof process.versions === 'object') {
+				// 	if (process.versions.node !== 'undefined') {
+				// 		isNode = true;
+				// 	}
+				// }
 			}
 
 			if (isNode) {
@@ -63,23 +67,23 @@ function createClass(obj) {
 				loadRequires.call(this, this._willow.requires.both);
 				loadRequires.call(this, this._willow.requires.server);
 
-				obj.requires = this.requires;
+				// ChildClass.requires = this.requires;
+				ChildClass.prototype.requires = this.requires;
 			}
-
-			// Build out the child component
-			this.ChildClass = React.createClass(obj);
+			else {
+				ChildClass.prototype.requires = this.requires;
+			}
 
 			this.on = WillowMethods.on();
 			this.trigger = WillowMethods.trigger();
 			this.require = WillowMethods.require();
 			this.metadata = WillowMethods.metadata();
-			this.ChildClass.prototype.on = WillowMethods.on(this);
-			this.ChildClass.prototype.trigger = WillowMethods.trigger(this);
-			this.ChildClass.prototype.require = WillowMethods.require(this);
-			this.ChildClass.prototype.metadata = WillowMethods.metadata(this);
+			ChildClass.prototype.on = WillowMethods.on(this);
+			ChildClass.prototype.trigger = WillowMethods.trigger(this);
+			ChildClass.prototype.require = WillowMethods.require(this);
+			ChildClass.prototype.metadata = WillowMethods.metadata(this);
 		},
 		render: function() {
-			var ChildClass = this.ChildClass;
 			return React.createElement(ChildClass, this.props);
 		}
 	});
