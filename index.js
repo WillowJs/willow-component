@@ -8,7 +8,8 @@ var WillowMethods = {
 	trigger: require('./libs/methods/trigger'),
 	metadata: require('./libs/methods/metadata'),
 	require: require('./libs/methods/require'),
-	run: require('./libs/methods/run')
+	run: require('./libs/methods/run'),
+	toString: require('./libs/methods/toString')
 };
 
 module.exports = {
@@ -53,10 +54,13 @@ function createClass(obj) {
 	ParentClass.require = WillowMethods.require(ParentClass.prototype);
 	ParentClass.metadata = WillowMethods.metadata(ParentClass.prototype);
 	ParentClass.run = WillowMethods.run(ParentClass.prototype);
+	ParentClass.toString = WillowMethods.toString(ParentClass.prototype);
 
 	ParentClass.prototype._willow = {
 		events: {},
-		requires: { client: {}, server: {}, both: {} }
+		contents: obj,
+		requires: { client: {}, server: {}, both: {} },
+		metadata: function(){}
 	};
 
 	return ParentClass;

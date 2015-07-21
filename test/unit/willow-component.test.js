@@ -1,5 +1,3 @@
-'use strict';
-
 /*global describe, it, before, beforeEach, after, afterEach, expect, utils, sinon */
 
 var Willow = require('../../index.js');
@@ -363,85 +361,103 @@ describe('willow-component', function() {
 		});
 	});
 
-	// describe('toString', function() {
-	// 	it('should exist', function() {
-	// 		expect(Comp.toString).not.to.be.undefined;
-	// 	});
-	// 	it('should return a valid javascript object', function() {
-	// 		var obj;
-	// 		eval('obj = '+Comp.toString());
-	// 		expect(obj.contents).not.to.be.undefined;
-	// 		expect(obj.contents.render).not.to.be.undefined;
-	// 	});
-	// 	it('should convert events properly', function() {
-	// 		var Comp = Willow.createClass({
-	// 			render: function() {
-	// 				return (<h1>Hello World</h1>);
-	// 			}
-	// 		})
-	// 		.require('_', 'lodash', 'server')
-	// 		.on('event1', {
-	// 			name: 'event1.test',
-	// 			method: 'local',
-	// 			dependencies: [],
-	// 			run: function() {
+	describe('toString', function() {
+		// // Some setup code...
+		var Comp = Willow.createClass({
+			render: function() {
+				return (<h1>Hello World</h1>);
+			}
+		})
+		.on('baz', {
+			name: 'hello',
+			dependencies: [],
+			run: function(e, resolve, reject) {
+				var pieces = e.echo.split('-');
+				var obj = {};
+				obj[pieces[0]] = pieces[1];
+				resolve(obj);
+			}
+		});
 
-	// 			}
-	// 		})
-	// 		.on('event1', {
-	// 			name: 'event1.anotherTest',
-	// 			method: 'local',
-	// 			dependencies: ['event1.test'],
-	// 			run: function() {
+		it('should exist', function() {
+			expect(Comp.toString).not.to.be.undefined;
+		});
+		it('should return a valid javascript object', function() {
+			var obj;
+			eval('obj = '+Comp.toString());
+			console.log(obj);
+			expect(obj.contents).not.to.be.undefined;
+			expect(obj.contents.render).not.to.be.undefined;
+		});
+		it('should convert events properly', function() {
+			var Comp2 = Willow.createClass({
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.require('_', 'lodash', 'server')
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function() {
 
-	// 			}
-	// 		});
+				}
+			})
+			.on('event1', {
+				name: 'event1.anotherTest',
+				method: 'local',
+				dependencies: ['event1.test'],
+				run: function() {
 
-	// 		var obj;
-	// 		eval('obj = '+Comp.toString());
-	// 		expect(obj.events).not.to.be.undefined;
-	// 		expect(obj.events.event1).not.to.be.undefined;
-	// 		expect(obj.events.event1['event1.test']).not.to.be.undefined;
-	// 		expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
-	// 		expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
-	// 		expect(obj.metadata).not.to.be.undefined;
-	// 		expect(obj.requires).not.to.be.undefined;
-	// 		expect(obj.requires.server._).to.equal('lodash');
-	// 	});
-	// 	it('should only should be able to only show local events', function() {
-	// 		var Comp = Willow.createClass({
-	// 			render: function() {
-	// 				return (<h1>Hello World</h1>);
-	// 			}
-	// 		})
-	// 		.on('event1', {
-	// 			name: 'event1.test',
-	// 			method: 'local',
-	// 			dependencies: [],
-	// 			run: function() {
+				}
+			});
 
-	// 			}
-	// 		})
-	// 		.on('event1', {
-	// 			name: 'event1.anotherTest',
-	// 			method: 'post',
-	// 			dependencies: ['event1.test'],
-	// 			run: function() {
+			var obj;
+			eval('obj = '+Comp2.toString());
+			expect(obj.events).not.to.be.undefined;
+			expect(obj.events.event1).not.to.be.undefined;
+			expect(obj.events.event1['event1.test']).not.to.be.undefined;
+			expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
+			expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
+			expect(obj.metadata).not.to.be.undefined;
+			expect(obj.requires).not.to.be.undefined;
+			expect(obj.requires.server._).to.equal('lodash');
+		});
+		it('should only should be able to only show local events', function() {
+			var Comp2 = Willow.createClass({
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function() {
 
-	// 			}
-	// 		});
+				}
+			})
+			.on('event1', {
+				name: 'event1.anotherTest',
+				method: 'post',
+				dependencies: ['event1.test'],
+				run: function() {
 
-	// 		var obj;
-	// 		eval('obj = '+Comp.toString(true));
-	// 		expect(obj.events).not.to.be.undefined;
-	// 		expect(obj.events.event1).not.to.be.undefined;
-	// 		expect(obj.events.event1['event1.test']).not.to.be.undefined;
-	// 		expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
-	// 		expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
-	// 		expect(obj.events.event1['event1.anothertest']).to.be.undefined;
-	// 		expect(obj.metadata).not.to.be.undefined;
-	// 	});
-	// });
+				}
+			});
+
+			var obj;
+			eval('obj = '+Comp2.toString(true));
+			expect(obj.events).not.to.be.undefined;
+			expect(obj.events.event1).not.to.be.undefined;
+			expect(obj.events.event1['event1.test']).not.to.be.undefined;
+			expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
+			expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
+			expect(obj.events.event1['event1.anothertest']).to.be.undefined;
+			expect(obj.metadata).not.to.be.undefined;
+		});
+	});
 
 	describe('run', function() {
 
