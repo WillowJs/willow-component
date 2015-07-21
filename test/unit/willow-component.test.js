@@ -1,27 +1,10 @@
+'use strict';
+
+/*global describe, it, before, beforeEach, after, afterEach, expect, utils, sinon */
+
 var Willow = require('../../index.js');
 var TestUtils = require('react/addons').addons.TestUtils;
 describe('willow-component', function() {
-
-
-	// // Some setup code...
-	// var Comp = Willow.createClass({
-	// 	render: function() {
-	// 		return (<h1>Hello World</h1>);
-	// 	}
-	// });
-	// .on('baz', {
-	// 	name: 'hello',
-	// 	dependencies: [],
-	// 	run: function(e, resolve, reject) {
-	// 		var pieces = e.echo.split('-');
-	// 		var obj = {};
-	// 		obj[pieces[0]] = pieces[1];
-	// 		resolve(obj);
-	// 	}
-	// });
-	// // var BuiltComp = Comp.build();
-	// var compNode = utils.renderIntoDocument(<BuiltComp />);
-
 
 	describe('on', function() {
 		it('should exist on classes', function() {
@@ -460,80 +443,98 @@ describe('willow-component', function() {
 	// 	});
 	// });
 
-	// describe('run', function() {
-	// 	it('should exist', function() {
-	// 		expect(Comp.run).not.to.be.undefined;
-	// 	});
-	// 	it('should reject invalid events', function(done) {
-	// 		Comp.run(
-	// 			'foo',
-	// 			'bar',
-	// 			{},
-	// 			'local',
-	// 			function(data) {},
-	// 			function(err) {
-	// 				expect(err.message).to.equal('Component has no event {{event}}.');
-	// 				expect(err.status).to.equal(404);
-	// 				expect(err.id).to.equal('NOEVENT');
-	// 				expect(err.params.event).to.equal('foo');
-	// 				done();
-	// 			}
-	// 		);
-	// 	});
-	// 	it('should reject invalid handlers', function(done) {
-	// 		Comp.run(
-	// 			'baz',
-	// 			'bar',
-	// 			{},
-	// 			'local',
-	// 			function(data) {},
-	// 			function(err) {
-	// 				expect(err.message).to.equal('Component has no handler {{event}}/{{handler}}.');
-	// 				expect(err.status).to.equal(404);
-	// 				expect(err.id).to.equal('NOHANDLER');
-	// 				expect(err.params.event).to.equal('baz');
-	// 				expect(err.params.handler).to.equal('bar');
-	// 				done();
-	// 			}
-	// 		);
-	// 	});
-	// 	it('should reject invalid methods', function(done) {
-	// 		Comp.run(
-	// 			'baz',
-	// 			'hello',
-	// 			{},
-	// 			'post',
-	// 			function(data) {},
-	// 			function(err) {
-	// 				expect(err.message).to.equal('run(...) call expected {{expectedMethod}} but {{event}}/{{handler}} has method {{actualMethod}}.');
-	// 				expect(err.status).to.equal(400);
-	// 				expect(err.id).to.equal('BADCALL');
-	// 				expect(err.params.event).to.equal('baz');
-	// 				expect(err.params.handler).to.equal('hello');
-	// 				expect(err.params.expectedMethod).to.equal('local');
-	// 				expect(err.params.actualMethod).to.equal('post');
-	// 				done();
-	// 			}
-	// 		);
-	// 	});
-	// 	it('should accept valid methods', function(done) {
-	// 		Comp.run(
-	// 			'baz',
-	// 			'hello',
-	// 			{
-	// 				echo: 'hello-world'
-	// 			},
-	// 			'local',
-	// 			function(data) {
-	// 				expect(data.hello).to.deep.equal({ hello: 'world' });
-	// 				done();
-	// 			},
-	// 			function(err) {
-	// 				console.log(err);
-	// 			}
-	// 		);
-	// 	});
-	// });
+	describe('run', function() {
+
+		// // Some setup code...
+		var Comp = Willow.createClass({
+			render: function() {
+				return (<h1>Hello World</h1>);
+			}
+		})
+		.on('baz', {
+			name: 'hello',
+			dependencies: [],
+			run: function(e, resolve, reject) {
+				var pieces = e.echo.split('-');
+				var obj = {};
+				obj[pieces[0]] = pieces[1];
+				resolve(obj);
+			}
+		});
+
+		it('should exist', function() {
+			expect(Comp.run).not.to.be.undefined;
+		});
+		it('should reject invalid events', function(done) {
+			Comp.run(
+				'foo',
+				'bar',
+				{},
+				'local',
+				function(data) {},
+				function(err) {
+					expect(err.message).to.equal('Component has no event {{event}}.');
+					expect(err.status).to.equal(404);
+					expect(err.id).to.equal('NOEVENT');
+					expect(err.params.event).to.equal('foo');
+					done();
+				}
+			);
+		});
+		it('should reject invalid handlers', function(done) {
+			Comp.run(
+				'baz',
+				'bar',
+				{},
+				'local',
+				function(data) {},
+				function(err) {
+					expect(err.message).to.equal('Component has no handler {{event}}/{{handler}}.');
+					expect(err.status).to.equal(404);
+					expect(err.id).to.equal('NOHANDLER');
+					expect(err.params.event).to.equal('baz');
+					expect(err.params.handler).to.equal('bar');
+					done();
+				}
+			);
+		});
+		it('should reject invalid methods', function(done) {
+			Comp.run(
+				'baz',
+				'hello',
+				{},
+				'post',
+				function(data) {},
+				function(err) {
+					expect(err.message).to.equal('run(...) call expected {{expectedMethod}} but {{event}}/{{handler}} has method {{actualMethod}}.');
+					expect(err.status).to.equal(400);
+					expect(err.id).to.equal('BADCALL');
+					expect(err.params.event).to.equal('baz');
+					expect(err.params.handler).to.equal('hello');
+					expect(err.params.expectedMethod).to.equal('local');
+					expect(err.params.actualMethod).to.equal('post');
+					done();
+				}
+			);
+		});
+		it('should accept valid methods', function(done) {
+			Comp.run(
+				'baz',
+				'hello',
+				{
+					echo: 'hello-world'
+				},
+				'local',
+				function(data) {
+					expect(data.hello).to.deep.equal({ hello: 'world' });
+					done();
+				},
+				function(err) {
+					console.log(err);
+				}
+			);
+		});
+	});
 
 	describe('metadata', function() {
 		it('should exist', function() {
@@ -563,7 +564,7 @@ describe('willow-component', function() {
 		});
 		it('should throw and error if no var name is specified', function() {
 			var CompClass = Willow.createClass({});
-			expect(function() {CompClass.require()}).to.throw({
+			expect(function() { CompClass.require(); }).to.throw({
 				message: 'A variable name is required',
 				status: 400,
 				id: 'NOVARNAME',
@@ -572,7 +573,7 @@ describe('willow-component', function() {
 		});
 		it('should throw and error if an invalid var name is specified', function() {
 			var CompClass = Willow.createClass({});
-			expect(function() {CompClass.require(true)}).to.throw({
+			expect(function() { CompClass.require(true); }).to.throw({
 				message: 'Variable names must be strings',
 				status: 400,
 				id: 'BADVARNAME',
@@ -581,7 +582,7 @@ describe('willow-component', function() {
 		});
 		it('should throw and error if no module name is specified', function() {
 			var CompClass = Willow.createClass({});
-			expect(function() {CompClass.require('hello')}).to.throw({
+			expect(function() { CompClass.require('hello'); }).to.throw({
 				message: 'A module to include must be specified',
 				status: 400,
 				id: 'NOMODNAME',
@@ -599,7 +600,7 @@ describe('willow-component', function() {
 		});
 		it('should throw and error if no context is specified', function() {
 			var CompClass = Willow.createClass({});
-			expect(function() {CompClass.require('hello', 'world')}).to.throw({
+			expect(function() { CompClass.require('hello', 'world'); }).to.throw({
 				message: 'A context is require ("client" or "server" or "both")',
 				status: 400,
 				id: 'NOCONTEXT',
@@ -608,7 +609,7 @@ describe('willow-component', function() {
 		});
 		it('should throw and error if a bad context is specified', function() {
 			var CompClass = Willow.createClass({});
-			expect(function() {CompClass.require('hello', 'world', [])}).to.throw({
+			expect(function() { CompClass.require('hello', 'world', []); }).to.throw({
 				message: 'Context must be a string',
 				status: 400,
 				id: 'BADCONTEXT',
@@ -617,7 +618,7 @@ describe('willow-component', function() {
 		});
 		it('should throw and error if an invalid context is specified', function() {
 			var CompClass = Willow.createClass({});
-			expect(function() {CompClass.require('hello', 'world', [])}).to.throw({
+			expect(function() { CompClass.require('hello', 'world', []); }).to.throw({
 				message: 'Context must be either "client", "server" or "both"',
 				status: 400,
 				id: 'INVALIDCONTEXT',
