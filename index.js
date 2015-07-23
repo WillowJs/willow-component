@@ -78,8 +78,9 @@ function createClass(obj) {
 			this.trigger = WillowMethods.trigger();
 			this.require = WillowMethods.require();
 			this.metadata = WillowMethods.metadata();
+			ChildClass.prototype._willow = this._willow;
 			ChildClass.prototype.on = WillowMethods.on(this);
-			ChildClass.prototype.trigger = WillowMethods.trigger(this);
+			ChildClass.prototype.trigger = WillowMethods.trigger();
 			ChildClass.prototype.require = WillowMethods.require(this);
 			ChildClass.prototype.metadata = WillowMethods.metadata(this);
 		},
