@@ -315,6 +315,34 @@ describe('willow-component', function() {
 			expect(childSpy.called).to.be.true;
 			expect(parentSpy.called).to.be.false;
 		});
+
+		it('should allow events to be triggered from event handlers', function(cb) {
+			var OtherComp = Willow.createClass({
+				render: function() {
+					return (<h1>Hello World</h1>);
+				}
+			})
+			.on('event1', {
+				name: 'event1.test',
+				method: 'local',
+				dependencies: [],
+				run: function(e, resolve, reject) {
+					this.trigger('event2')(e);
+				}
+			})
+			.on('event2', {
+				name: 'other',
+				method: 'local',
+				dependencies: [],
+				run: function(e, resolve, reject) {
+					expect(e.info).to.equal('yes');
+					cb();
+				}
+			});
+
+			var otherCompNode = utils.renderIntoDocument(<OtherComp name="parent" />);
+			otherCompNode.trigger('event1')({info: 'yes'});
+		});
 	});
 
 	/*
