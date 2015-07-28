@@ -9,18 +9,15 @@ describe('willow-component', function() {
 			var ComponentClass = Willow.createClass({});
 			expect(ComponentClass.on).not.to.be.undefined;
 		});
-		it('should exist on nodes', function() {
+		it('should not exist on nodes', function() {
 			var ComponentClass = Willow.createClass({});
 			var compNode = utils.renderIntoDocument(<ComponentClass />);
-			expect(compNode.on).not.to.be.undefined;
+			expect(compNode.on).to.be.undefined;
 		});
 		it('should return itself for method chaining', function() {
 			var ComponentClass = Willow.createClass({
 				componentDidMount: function () {
-					expect(this.on('test', {
-						name: 'pancakes',
-						run: function(){}
-					})).to.equal(this);
+					expect(this.on).to.be.undefined;
 				}
 			});
 			expect(ComponentClass.on('test', {
@@ -29,10 +26,7 @@ describe('willow-component', function() {
 			})).to.equal(ComponentClass);
 
 			var compNode = utils.renderIntoDocument(<ComponentClass />);
-			expect(compNode.on('test', {
-				name: 'goodbye',
-				run: function(){}
-			})).to.equal(compNode);
+			expect(compNode.on).to.be.undefined;
 		});
 		it('should not allow event handlers without a name', function() {
 			var comp = Willow.createClass({});
@@ -116,38 +110,15 @@ describe('willow-component', function() {
 				params: {}
 			});
 		});
-		it('should work both on the class and on the node', function() {
+		it('should work on the class but not on the node', function() {
 			var ComponentClass = Willow.createClass({}).on('test', {
 				name: 'hello',
+				method: 'get',
 				dependencies: [],
 				run: function(){}
 			});
 			var compNode = utils.renderIntoDocument(<ComponentClass />);
-			expect(compNode._willow.events.test.hello.name).to.equal('hello');
-
-			compNode.on('test', {
-				name: 'goodbye',
-				dependencies: ['hello'],
-				run: function(){}
-			});
-			expect(compNode._willow.events.test.goodbye.dependencies[0]).to.equal('hello');
-		});
-
-		it('should not modify the class when called on the node', function() {
-			var ComponentClass = Willow.createClass({}).on('test', {
-				name: 'hello',
-				dependencies: [],
-				run: function(){}
-			});
-			var compNode = utils.renderIntoDocument(<ComponentClass />);
-
-			compNode.on('test', {
-				name: 'goodbye',
-				dependencies: ['hello'],
-				run: function(){}
-			});
-			expect(ComponentClass.prototype._willow.events.test.goodbye).to.be.undefined;
-			expect(compNode._willow.events.test.goodbye).not.to.be.undefined;
+			expect(compNode.hasHandler('test', 'hello')).to.be.true;
 		});
 	});
 
@@ -346,6 +317,7 @@ describe('willow-component', function() {
 		});
 	});
 
+	/*
 	describe('toString', function() {
 		var Comp = Willow.createClass({
 			render: function() {
@@ -649,4 +621,5 @@ describe('willow-component', function() {
 	// 		expect(comp.requires().client._).to.equal('lodash');
 	// 	});
 	// });
+	*/
 });

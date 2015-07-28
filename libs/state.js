@@ -1,14 +1,66 @@
-var validateHandler = require('./validation/validateHandler');
-var validateRequire = require('./validation/validateRequire');
+'use strict';
+var WillowError = require('willow-error');
+var validateHandler = require('./validation/handler');
+var validateRequire = require('./validation/require');
+var _ = require('./lodash/lodash.custom.js');
+var async = require('async');
+var eventRunner = require('./event-runner');
 
-module.exports = function() {
-	var _events = {};
-	var _contents = {};
-	var _requires = {};
-	var _metadata = function() {
+var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequires/*, _config*/) {
+	_events = _events || {};
+	_contents = _contents || {};
+	_requires = _requires || {};
+	_metadata = _metadata || function() {};
+	_loadedRequires = _loadedRequires || {};
+	// _config = _config || {};
 
+	this.setContents = function(contents) {
+		_contents = contents;
 	};
-	var _config = {};
+
+	this.loadServerRequires = function() {
+		if (typeof process !== 'object' || process.browser) {
+			throw new WillowError(
+				'loadServerRequires can only be called from the server.',
+				{},
+				400,
+				'CLIENTONLY'
+			);
+		}
+		var path = require('path');
+		var filePath = '';
+		for(var i in _requires) {
+			filePath = _requires[i];
+			if(filePath.charAt(0) === '.') {
+				filePath = path.resolve(
+					path.dirname(module.parent.filename),
+					filePath
+				);
+			}
+			_loadedRequires[i] = require(filePath);
+		}
+	};
+
+	this.setRequires = function(requires) {
+		_loadedRequires = requires;
+	};
+
+	this.getRequires = function() {
+		return _loadedRequires;
+	};
+
+	/*
+	 * For duplicating the WillowState
+	 */
+	this.clone = function() {
+		return new WillowState(
+			_.cloneDeep(_events),
+			_.cloneDeep(_contents),
+			_.cloneDeep(_requires),
+			_.cloneDeep(_metadata)/*,
+			_.cloneDeep(_.config)*/
+		);
+	};
 
 	/*
 	 * For adding event handlers
@@ -53,14 +105,11 @@ module.exports = function() {
 	/*
 	 * For adding url specific metadata
 	 */
-	this.metadata = function(fnOrObj) {
-		if(_.isFunction(fnOrObj)) {
-			_metadata = fnOrObj;
-			return this;
-		}
-		else {
-			return _metadata(fnOrObj);
-		}
+	this.setMetadata = function(fn) {
+		_metadata = fn;
+	};
+	this.getMetadata = function(obj) {
+		return _metadata(obj);
 	};
 
 	this.require = function(varName, modName, context) {
@@ -119,7 +168,87 @@ module.exports = function() {
 			reject
 		);
 	};
-	this.toString = require('./on');
-	this.trigger = require('./on');
 
+	this.hasHandler = function(eventName, handler) {
+		if(!_events.hasOwnProperty(eventName)) {
+			return false;
+		}
+		if(!_events[eventName].hasOwnProperty(handler)) {
+			return false;
+		}
+		return true;
+	};
+
+	this.trigger = function(node, eventName, eventObj) {
+		if(!node) {
+			throw new WillowError(
+				'The trigger method was called without a react node.',
+				{},
+				400,
+				'NONODE'
+			);
+		}
+
+		if(!eventName) {
+			throw new WillowError(
+				'The trigger method was called without an event name.',
+				{},
+				400,
+				'NOEVENT'
+			);
+		}
+
+		if(!_.isString(eventName)) {
+			throw new WillowError(
+				'The event name was expected to be a string.',
+				{},
+				400,
+				'BADEVENT'
+			);
+		}
+
+		eventName = eventName.toLowerCase();
+		eventObj = eventObj || {};
+
+		function eventComplete(err, data) {
+			eventObj.results = data;
+
+			// Check if the event should bubble synchronously, if so pass to
+			// parent, otherwise do nothing
+			if(node.props.trigger) {
+				if(node.props.events && node.props.events.hasOwnProperty(eventName)) {
+					if(node.props.events[eventName].sync) {
+						node.props.trigger.call(node, eventName)(eventObj);
+					}
+				}
+			}
+		}
+
+		// If there is no event handler then end right here
+		if(!_events.hasOwnProperty(eventName)) {
+			return eventComplete(null, {});
+		}
+
+		var asyncObj = {};
+		for(var i in _events[eventName]) {
+			var handler = _events[eventName][i];
+			asyncObj[handler.name] = eventRunner.call(node, handler, eventObj);
+		}
+
+		// Check if the event should bubble asynchronously, if so pass to
+		// parent, otherwise do nothing
+		async.auto(asyncObj, eventComplete);
+
+		if(node.props.trigger) {
+			if(node.props.events && node.props.events.hasOwnProperty(eventName)) {
+				if(!node.props.events[eventName].sync) {
+					node.props.trigger.call(node, eventName)(eventObj);
+				}
+			}
+		}
+	};
+
+	// this.toString = require('./on');
 };
+
+module.exports = WillowState;
