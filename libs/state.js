@@ -9,7 +9,11 @@ var eventRunner = require('./event-runner');
 var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequires/*, _config*/) {
 	_events = _events || {};
 	_contents = _contents || {};
-	_requires = _requires || {};
+	_requires = _requires || {
+		server: {},
+		client: {},
+		both: {}
+	};
 	_metadata = _metadata || function() {};
 	_loadedRequires = _loadedRequires || {};
 	// _config = _config || {};
@@ -24,13 +28,13 @@ var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequ
 				'loadServerRequires can only be called from the server.',
 				{},
 				400,
-				'CLIENTONLY'
+				'SERVERONLY'
 			);
 		}
 		var path = require('path');
 		var filePath = '';
-		for(var i in _requires) {
-			filePath = _requires[i];
+		for(var i in _requires.both) {
+			filePath = _requires.both[i];
 			if(filePath.charAt(0) === '.') {
 				filePath = path.resolve(
 					path.dirname(module.parent.filename),
@@ -38,6 +42,16 @@ var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequ
 				);
 			}
 			_loadedRequires[i] = require(filePath);
+		}
+		for(var j in _requires.server) {
+			filePath = _requires.server[j];
+			if(filePath.charAt(0) === '.') {
+				filePath = path.resolve(
+					path.dirname(module.parent.filename),
+					filePath
+				);
+			}
+			_loadedRequires[j] = require(filePath);
 		}
 	};
 
@@ -125,6 +139,7 @@ var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequ
 		return this;
 
 	};
+
 	this.run = function(eventName, handler, eventObj, actualMethod, resolve, reject) {
 		eventName = eventName.toLowerCase();
 		if(!_events.hasOwnProperty(eventName)) {

@@ -1,3 +1,4 @@
+'use strict';
 /*global describe, it, before, beforeEach, after, afterEach, expect, utils, sinon */
 
 var Willow = require('../../index.js');
@@ -562,8 +563,7 @@ describe('willow-component', function() {
 			expect(comp.setMetadata(function(){}).setMetadata).not.to.be.undefined;
 		});
 	});
-	
-	/*
+
 	describe('require', function() {
 		it('should exist', function() {
 			expect(Willow.createClass({}).require).not.to.be.undefined;
@@ -601,7 +601,7 @@ describe('willow-component', function() {
 		});
 		it('should throw and error if an invalid module name is specified', function() {
 			var CompClass = Willow.createClass({});
-			expect(function() {CompClass.require('hello', 7)}).to.throw({
+			expect(function() { CompClass.require('hello', 7); }).to.throw({
 				message: 'Module names must be strings',
 				status: 400,
 				id: 'BADMODNAME',
@@ -649,17 +649,4 @@ describe('willow-component', function() {
 			expect(compNode.requires._.isFunction).not.to.be.undefined;
 		});
 	});
-
-	// describe('requires', function() {
-	// 	Comp.require('_', 'lodash', 'client');
-
-	// 	it('should exist', function() {
-	// 		expect(Willow.createClass({}).requires).not.to.be.undefined;
-	// 	});
-	// 	it('should return an object with all the required modules', function() {
-	// 		var comp = Willow.createClass({}).require('_', 'lodash', 'client');
-	// 		expect(comp.requires().client._).to.equal('lodash');
-	// 	});
-	// });
-	*/
 });
