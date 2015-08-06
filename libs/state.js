@@ -107,6 +107,7 @@ var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequ
 	 */
 	this.setMetadata = function(fn) {
 		_metadata = fn;
+		return this;
 	};
 	this.getMetadata = function(obj) {
 		return _metadata(obj);

@@ -442,6 +442,7 @@ describe('willow-component', function() {
 			expect(obj.metadata).not.to.be.undefined;
 		});
 	});
+	*/
 
 	describe('run', function() {
 		var Comp = Willow.createClass({
@@ -534,24 +535,35 @@ describe('willow-component', function() {
 		});
 	});
 
-	describe('metadata', function() {
+	describe('getMetadata', function() {
 		it('should exist', function() {
-			expect(Willow.createClass().metadata).not.to.be.undefined;
+			expect(Willow.createClass().getMetadata).not.to.be.undefined;
 		});
-		it('should return itself for method chaining when passed a function argument', function() {
+		it('should return a undefined when no metadata is set', function() {
 			var comp = Willow.createClass({});
-			expect(comp.metadata(function(){})).to.equal(comp);
+			expect(comp.getMetadata('hello')).to.be.undefined;
 		});
-		it('should return a metadata object when passed a non-function argument', function() {
-			var comp = Willow.createClass({}).metadata(function(test) {
+		it('should return the correct metadata object', function() {
+			var comp = Willow.createClass({}).setMetadata(function(test) {
 				return {
 					value: test
 				};
 			});
-			expect(comp.metadata('hello')).to.deep.equal({value: 'hello'});
+			expect(comp.getMetadata('hello')).to.deep.equal({value: 'hello'});
 		});
 	});
 
+	describe('setMetadata', function() {
+		it('should exist', function() {
+			expect(Willow.createClass().setMetadata).not.to.be.undefined;
+		});
+		it('should return willow state when it is called', function() {
+			var comp = Willow.createClass({});
+			expect(comp.setMetadata(function(){}).setMetadata).not.to.be.undefined;
+		});
+	});
+	
+	/*
 	describe('require', function() {
 		it('should exist', function() {
 			expect(Willow.createClass({}).require).not.to.be.undefined;
