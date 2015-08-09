@@ -22,6 +22,10 @@ var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequ
 		_contents = contents;
 	};
 
+	this.getContents = function() {
+		return _contents;
+	};
+
 	this.loadServerRequires = function() {
 		if (typeof process !== 'object' || process.browser) {
 			throw new WillowError(
