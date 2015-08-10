@@ -49,19 +49,19 @@ module.exports = {
 // 	}
 // }
 
-function createClass(obj) {
+function createClass(_contents, _events, _requires, _metadata) {
 
-	obj = obj || {};
+	_contents = _contents || {};
 
 	// Fill in a render method
-	if(!obj.render) {
-		obj.render = function() {
+	if(!_contents.render) {
+		_contents.render = function() {
 			return React.createElement('h1', {}, 'No render method implemented');
 		};
 	}
 
 	// Build out the child component
-	var ChildClass = React.createClass(obj);
+	var ChildClass = React.createClass(_contents);
 
 	var ParentClass = React.createClass({
 		componentWillMount: function() {
@@ -123,7 +123,7 @@ function createClass(obj) {
 		}
 	});
 
-	var classState = new WillowState(obj);
+	var classState = new WillowState(_contents);
 
 	ParentClass.on = classState.on;
 	ParentClass.require = classState.require;
