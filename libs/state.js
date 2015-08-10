@@ -155,6 +155,10 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 
 	};
 
+	this.loadRequire = function(varName, module) {
+		_loadedRequires[varName] = module;
+	};
+
 	this.run = function(eventName, handler, eventObj, actualMethod, resolve, reject) {
 		eventName = eventName.toLowerCase();
 		if(!_events.hasOwnProperty(eventName)) {

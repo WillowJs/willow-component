@@ -123,7 +123,7 @@ function createClass(_contents, _events, _requires, _metadata) {
 		}
 	});
 
-	var classState = new WillowState(_contents);
+	var classState = new WillowState(_contents, _events, _requires, _metadata);
 
 	ParentClass.on = classState.on;
 	ParentClass.require = classState.require;
