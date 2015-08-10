@@ -100,7 +100,7 @@ function createClass(_contents, _events, _requires, _metadata) {
 			this.getMetadata = instanceState.getMetadata;
 			this.hasHandler = instanceState.hasHandler;
 
-			ChildClass.prototype.requires = instanceState.getRequires();
+			ChildClass.prototype.requires = instanceState.getLoadedRequires();
 			ChildClass.prototype.trigger = trigger;
 			ChildClass.prototype.setMetadata = instanceState.setMetadata;
 			ChildClass.prototype.getMetadata = instanceState.getMetadata;
