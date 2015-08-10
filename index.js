@@ -94,7 +94,7 @@ function createClass(_contents, _events, _requires, _metadata) {
 			// 	ChildClass.prototype.requires = this.requires;
 			// }
 
-			this.requires = instanceState.getRequires();
+			this.requires = instanceState.getLoadedRequires();
 			this.trigger = trigger;
 			this.setMetadata = instanceState.setMetadata;
 			this.getMetadata = instanceState.getMetadata;

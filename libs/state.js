@@ -68,7 +68,15 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 	};
 
 	this.getRequires = function() {
+		return _requires;
+	};
+
+	this.getLoadedRequires = function() {
 		return _loadedRequires;
+	};
+
+	this.loadRequire = function(varName, module) {
+		_loadedRequires[varName] = module;
 	};
 
 	/*
@@ -153,10 +161,6 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 
 		return this;
 
-	};
-
-	this.loadRequire = function(varName, module) {
-		_loadedRequires[varName] = module;
 	};
 
 	this.run = function(eventName, handler, eventObj, actualMethod, resolve, reject) {
