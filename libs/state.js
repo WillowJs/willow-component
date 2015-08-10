@@ -45,7 +45,7 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 			filePath = _requires.both[i];
 			if(filePath.charAt(0) === '.') {
 				filePath = path.resolve(
-					path.dirname(module.parent.filename),
+					path.dirname(module.parent.parent.filename),
 					filePath
 				);
 			}
@@ -55,7 +55,7 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 			filePath = _requires.server[j];
 			if(filePath.charAt(0) === '.') {
 				filePath = path.resolve(
-					path.dirname(module.parent.filename),
+					path.dirname(module.parent.parent.filename),
 					filePath
 				);
 			}
