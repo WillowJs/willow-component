@@ -49,7 +49,7 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 					filePath
 				);
 			}
-			_loadedRequires[i] = require(filePath);
+			this.loadRequire(i, require(filePath));
 		}
 		for(var j in _requires.server) {
 			filePath = _requires.server[j];
@@ -59,7 +59,7 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 					filePath
 				);
 			}
-			_loadedRequires[j] = require(filePath);
+			this.loadRequire(j, require(filePath));
 		}
 	};
 
