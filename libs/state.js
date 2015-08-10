@@ -6,7 +6,7 @@ var _ = require('./lodash/lodash.custom.js');
 var async = require('async');
 var eventRunner = require('./event-runner');
 
-var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequires/*, _config*/) {
+var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequires/*, _config*/) {
 	_events = _events || {};
 	_contents = _contents || {};
 	_requires = _requires || {
@@ -76,8 +76,8 @@ var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequ
 	 */
 	this.clone = function() {
 		return new WillowState(
-			_.cloneDeep(_events),
 			_.cloneDeep(_contents),
+			_.cloneDeep(_events),
 			_.cloneDeep(_requires),
 			_.cloneDeep(_metadata)/*,
 			_.cloneDeep(_.config)*/

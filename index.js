@@ -123,7 +123,7 @@ function createClass(obj) {
 		}
 	});
 
-	var classState = new WillowState(null, obj);
+	var classState = new WillowState(obj);
 
 	ParentClass.on = classState.on;
 	ParentClass.require = classState.require;
