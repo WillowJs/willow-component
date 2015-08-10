@@ -128,6 +128,13 @@ var WillowState = function(_events, _contents, _requires, _metadata, _loadedRequ
 	 * For adding url specific metadata
 	 */
 	this.setMetadata = function(fn) {
+		if(!_.isFunction(fn)) {
+			throw new WillowError(
+				'Argument must be a function',
+				400,
+				'NONFUNCTION'
+			);
+		}
 		_metadata = fn;
 		return this;
 	};
