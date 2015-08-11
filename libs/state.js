@@ -23,6 +23,7 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 		both: {}
 	};
 
+	// Contents
 	this.setContents = function(contents) {
 		_contents = contents;
 	};
@@ -31,8 +32,65 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 		return _contents;
 	};
 
+	// Events
 	this.getEvents = function() {
 		return _events;
+	};
+
+	this.setEvents = function(events) {
+		_events = events;
+	};
+
+	this.on = function(name, handler) {
+		if(!name) {
+			throw new WillowError(
+				'An event name is required',
+				500,
+				'NOEVENTNAME'
+			);
+		}
+
+		name = name.toLowerCase();
+		if(!_events.hasOwnProperty(name)) {
+			_events[name] = {};
+		}
+
+		handler.method = handler.method || 'local';
+		handler.dependencies = handler.dependencies || [];
+		handler.middleware = handler.middleware || [];
+
+		var error = validateHandler(handler);
+
+		if(error) {
+			throw error;
+		}
+
+		if(_events[name].hasOwnProperty(handler.name.toLowerCase())) {
+			console.warn(
+				'Event "'+name+'" handler "'+handler.name+
+				'" already exists. We are updating the current \
+				handler rather than adding a new one.'
+			);
+		}
+
+		_events[name][handler.name.toLowerCase()] = handler;
+
+		return this; // for chaining
+	};
+
+	// Requires
+	this.require = function(varName, modName, context) {
+		var error = validateRequire(varName, modName, context);
+		if(error) {
+			throw error;
+		}
+
+		context = context.toLowerCase();
+
+		_requires[context][varName] = modName;
+
+		return this;
+
 	};
 
 	this.loadServerRequires = function() {
@@ -98,49 +156,7 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 		);
 	};
 
-	/*
-	 * For adding event handlers
-	 */
-	this.on = function(name, handler) {
-		if(!name) {
-			throw new WillowError(
-				'An event name is required',
-				500,
-				'NOEVENTNAME'
-			);
-		}
-
-		name = name.toLowerCase();
-		if(!_events.hasOwnProperty(name)) {
-			_events[name] = {};
-		}
-
-		handler.method = handler.method || 'local';
-		handler.dependencies = handler.dependencies || [];
-		handler.middleware = handler.middleware || [];
-
-		var error = validateHandler(handler);
-
-		if(error) {
-			throw error;
-		}
-
-		if(_events[name].hasOwnProperty(handler.name.toLowerCase())) {
-			console.warn(
-				'Event "'+name+'" handler "'+handler.name+
-				'" already exists. We are updating the current \
-				handler rather than adding a new one.'
-			);
-		}
-
-		_events[name][handler.name.toLowerCase()] = handler;
-
-		return this; // for chaining
-	};
-
-	/*
-	 * For adding url specific metadata
-	 */
+	// Metadata
 	this.setMetadata = function(fn) {
 		if(!_.isFunction(fn)) {
 			throw new WillowError(
@@ -156,20 +172,7 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 		return _metadata(obj);
 	};
 
-	this.require = function(varName, modName, context) {
-		var error = validateRequire(varName, modName, context);
-		if(error) {
-			throw error;
-		}
-
-		context = context.toLowerCase();
-
-		_requires[context][varName] = modName;
-
-		return this;
-
-	};
-
+	// Config
 	this.setConfig = function(key, value, context) {
 		var error = validateConfig(key, value, context);
 		if(error) {
