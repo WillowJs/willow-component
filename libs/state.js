@@ -2,11 +2,12 @@
 var WillowError = require('willow-error');
 var validateHandler = require('./validation/handler');
 var validateRequire = require('./validation/require');
+var validateConfig = require('./validation/config');
 var _ = require('./lodash/lodash.custom.js');
 var async = require('async');
 var eventRunner = require('./event-runner');
 
-var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequires/*, _config*/) {
+var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequires, _config) {
 	_events = _events || {};
 	_contents = _contents || {};
 	_requires = _requires || {
@@ -16,7 +17,11 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 	};
 	_metadata = _metadata || function() {};
 	_loadedRequires = _loadedRequires || {};
-	// _config = _config || {};
+	_config = _config || {
+		server: {},
+		client: {},
+		both: {}
+	};
 
 	this.setContents = function(contents) {
 		_contents = contents;
@@ -88,8 +93,8 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 			_.cloneDeep(_events),
 			_.cloneDeep(_requires),
 			_.cloneDeep(_metadata),
-			_.cloneDeep(_loadedRequires)/*,
-			_.cloneDeep(_.config)*/
+			_.cloneDeep(_loadedRequires),
+			_.cloneDeep(_.config)
 		);
 	};
 
@@ -162,6 +167,22 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 
 		return this;
 
+	};
+
+	this.setConfig = function(key, value, context) {
+		context = context.toLowerCase();
+		var error = validateConfig(key, value, context);
+		if(error) {
+			throw error;
+		}
+
+		_config[context][key] = value;
+
+		return this;
+	};
+
+	this.getConfig = function() {
+		return _config;
 	};
 
 	this.run = function(eventName, handler, eventObj, actualMethod, resolve, reject) {

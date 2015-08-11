@@ -1,8 +1,6 @@
 'use strict';
-
 var React = require('react');
 var WillowState = require('./libs/state');
-// var _ = require('lodash');
 
 /*
  * Component Class
@@ -13,6 +11,7 @@ var WillowState = require('./libs/state');
  *	- run
  *	- toString
  *	- hasHandler
+ *	- config
  * Component Parent Instance
  *	- trigger
  *	- getMetadata
@@ -21,35 +20,16 @@ var WillowState = require('./libs/state');
  * Component Child Instance
  */
 
-// var WillowMethods = {
-// 	on: require('./libs/methods/on'),
-// 	trigger: require('./libs/methods/trigger'),
-// 	metadata: require('./libs/methods/metadata'),
-// 	require: require('./libs/methods/require'),
-// 	run: require('./libs/methods/run'),
-// 	toString: require('./libs/methods/toString')
-// };
+var isNode = false;
+if (typeof process === 'object') {
+	isNode = !process.browser;
+}
 
 module.exports = {
 	createClass: createClass
 };
 
-// function loadRequires(requires) {
-// 	var path = require('path');
-// 	var filePath = '';
-// 	for(var i in requires) {
-// 		filePath = requires[i];
-// 		if(filePath.charAt(0) === '.') {
-// 			filePath = path.resolve(
-// 				path.dirname(module.parent.filename),
-// 				filePath
-// 			);
-// 		}
-// 		this.requires[i] = require(filePath);
-// 	}
-// }
-
-function createClass(_contents, _events, _requires, _metadata) {
+function createClass(_contents) {
 
 	_contents = _contents || {};
 
@@ -76,23 +56,17 @@ function createClass(_contents, _events, _requires, _metadata) {
 				};
 			}
 
-			var isNode = false;
-			if (typeof process === 'object') {
-				isNode = !process.browser;
-			}
-
-			if (isNode) {
-				// this.requires = {};
-				// loadRequires.call(instanceState, instanceState.getRequires('both'));
-				// loadRequires.call(instanceState, instanceState.getRequires('server'));
-
-				// ChildClass.requires = this.requires;
+			if(isNode) {
+				var config = instanceState.getConfig();
+				this.config = {};
+				for(var i in config.both) {
+					this.config[i] = config.both[i];
+				}
+				for(var j in config.server) {
+					this.config[j] = config.server[j];
+				}
 				instanceState.loadServerRequires();
-				// ChildClass.prototype.requires = instanceState.getRequires();
 			}
-			// else {
-			// 	ChildClass.prototype.requires = this.requires;
-			// }
 
 			this.requires = instanceState.getLoadedRequires();
 			this.trigger = trigger;
@@ -101,32 +75,22 @@ function createClass(_contents, _events, _requires, _metadata) {
 			this.hasHandler = instanceState.hasHandler;
 
 			ChildClass.prototype.requires = instanceState.getLoadedRequires();
+			ChildClass.prototype.config = this.config;
 			ChildClass.prototype.trigger = trigger;
 			ChildClass.prototype.setMetadata = instanceState.setMetadata;
 			ChildClass.prototype.getMetadata = instanceState.getMetadata;
 			ChildClass.prototype.hasHandler = instanceState.hasHandler;
-
-			// this.on = WillowMethods.on();
-			// this.trigger = WillowMethods.trigger();
-			// this.require = WillowMethods.require();
-			// this.metadata = WillowMethods.metadata();
-			// ChildClass.prototype._willow = this._willow;
-			// ChildClass.prototype.on = WillowMethods.on(this);
-			// ChildClass.prototype.trigger = WillowMethods.trigger();
-			// ChildClass.prototype.require = WillowMethods.require(this);
-			// ChildClass.prototype.metadata = WillowMethods.metadata(this);
 		},
 		render: function() {
-			// var props = _.cloneDeep(this.props);
-			// props.name = 'Child';
 			return React.createElement(ChildClass, this.props);
 		}
 	});
 
-	var classState = new WillowState(_contents, _events, _requires, _metadata);
+	var classState = new WillowState(_contents);
 
 	ParentClass.on = classState.on;
 	ParentClass.require = classState.require;
+	ParentClass.setConfig = classState.setConfig;
 	ParentClass.getMetadata = classState.getMetadata;
 	ParentClass.setMetadata = classState.setMetadata;
 	ParentClass.run = classState.run;
@@ -134,13 +98,6 @@ function createClass(_contents, _events, _requires, _metadata) {
 	ParentClass.hasHandler = classState.hasHandler;
 
 	ParentClass.prototype._willow = classState;
-
-	// ParentClass.prototype._willow = {
-	// 	events: {},
-	// 	contents: obj,
-	// 	requires: { client: {}, server: {}, both: {} },
-	// 	metadata: function(){}
-	// };
 
 	return ParentClass;
 }
