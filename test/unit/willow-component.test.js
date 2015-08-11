@@ -273,9 +273,9 @@ describe('willow-component', function() {
 		});
 		it('should work when valid params are passed in', function() {
 			var CompClass = Willow.createClass({});
-			expect(CompClass.require('foo', 'bar', 'client')).to.equal(CompClass);
-			expect(CompClass.require('faz', 'boz', 'server')).to.equal(CompClass);
-			expect(CompClass.require('face', 'book', 'both')).to.equal(CompClass);
+			expect(CompClass.config('foo', 'bar', 'client')).to.equal(CompClass);
+			expect(CompClass.config('faz', 'boz', 'server')).to.equal(CompClass);
+			expect(CompClass.config('face', 'book', 'both')).to.equal(CompClass);
 		});
 	});
 

@@ -117,7 +117,7 @@ var WillowState = function(_contents, _events, _metadata, _requires, _config) {
 
 		context = context.toLowerCase();
 
-		_config[context][key] = value;
+		_context.config[context][key] = value;
 
 		return this;
 	};
