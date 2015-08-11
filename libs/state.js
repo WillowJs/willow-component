@@ -87,7 +87,8 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 			_.cloneDeep(_contents),
 			_.cloneDeep(_events),
 			_.cloneDeep(_requires),
-			_.cloneDeep(_metadata)/*,
+			_.cloneDeep(_metadata),
+			_.cloneDeep(_loadedRequires)/*,
 			_.cloneDeep(_.config)*/
 		);
 	};
