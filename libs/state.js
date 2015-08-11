@@ -53,7 +53,7 @@ var WillowState = function(_contents, _events, _metadata, _requires, _config) {
 		_metadata = fn;
 	};
 
-	this.getMetadata = function(obj) {
+	this.getMetadata = function() {
 		return _metadata;
 	};
 
