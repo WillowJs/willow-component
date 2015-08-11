@@ -95,7 +95,9 @@ function createClass(_contents) {
 	ParentClass.setConfig = classState.setConfig;
 	ParentClass.metadata = classState.addMetadata;
 	ParentClass.getMetadata = classState.getMetadata;
-	ParentClass.run = classState.run;
+	ParentClass.run = function() {
+		return classState.run.apply(classState, arguments);
+	};
 	ParentClass.toString = classState.toString;
 	ParentClass.hasHandler = classState.hasHandler;
 
