@@ -279,6 +279,37 @@ describe('willow-component', function() {
 		});
 	});
 
+	describe('context', function() {
+		it('should have a getContext method', function() {
+			expect(Willow.createClass({}).prototype._willow.getContext).not.to.be.undefined;
+		});
+		it('should be able to get the full context object', function() {
+			var CompClass = Willow.createClass({});
+			CompClass.config('foo', 'twitter', 'client');
+			CompClass.require('foo', 'facebook', 'both');
+			CompClass.require('baz', 'google', 'server');
+
+			expect(CompClass.prototype._willow.getContext()).to.deep.equal({
+				config: {
+					both: {},
+					client: {
+						foo: 'twitter'
+					},
+					server: {}
+				},
+				requires: {
+					both: {
+						foo: 'facebook'
+					},
+					client: {},
+					server: {
+						baz: 'google'
+					}
+				}
+			});
+		});
+	});
+
 	describe('on', function() {
 		it('should exist on classes', function() {
 			var ComponentClass = Willow.createClass({});

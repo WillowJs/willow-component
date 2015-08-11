@@ -122,6 +122,14 @@ var WillowState = function(_contents, _events, _metadata, _requires, _config) {
 		return this;
 	};
 
+	// Context
+	this.getContext = function(key) {
+		if(key) {
+			return _context[key];
+		}
+		return _context;
+	};
+
 	// Other Methods
 
 	this.on = function(name, handler) {
