@@ -7,20 +7,27 @@ var _ = require('./lodash/lodash.custom.js');
 var async = require('async');
 var eventRunner = require('./event-runner');
 
-var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequires, _config) {
-	_events = _events || {};
+var WillowState = function(_contents, _events, _metadata, _requires, _config) {
 	_contents = _contents || {};
-	_requires = _requires || {
-		server: {},
-		client: {},
-		both: {}
-	};
+	_events = _events || {};
 	_metadata = _metadata || function() {};
-	_loadedRequires = _loadedRequires || {};
-	_config = _config || {
-		server: {},
-		client: {},
-		both: {}
+	_requires = _requires || {};
+	_config = _config || {};
+
+	this.require = _requires;
+	this.config = _config;
+
+	var _context = {
+		requires: {
+			both: {},
+			server: {},
+			client: {}
+		},
+		config: {
+			both: {},
+			server: {},
+			client: {}
+		}
 	};
 
 	// Contents
@@ -33,13 +40,89 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 	};
 
 	// Events
+	this.setEvents = function(events) {
+		_events = events;
+	};
+
 	this.getEvents = function() {
 		return _events;
 	};
 
-	this.setEvents = function(events) {
-		_events = events;
+	// Metadata
+	this.setMetadata = function(fn) {
+		_metadata = fn;
 	};
+
+	this.getMetadata = function(obj) {
+		return _metadata;
+	};
+
+	this.addMetadata = function(fn) {
+		if(!_.isFunction(fn)) {
+			throw new WillowError(
+				'Argument must be a function',
+				400,
+				'NONFUNCTION'
+			);
+		}
+		_metadata = fn;
+		return this;
+	};
+
+	this.calculateMetadata = function(input) {
+		if(_.isFunction(_metadata)) {
+			return _metadata(input);
+		}
+		return undefined;
+	};
+
+	// Requires
+	this.setRequires = function(requires) {
+		_requires = requires;
+		this.require = _requires;
+	};
+
+	this.getRequires = function() {
+		return _requires;
+	};
+
+	this.addRequire = function(key, modName, context) {
+		var error = validateRequire(key, modName, context);
+		if(error) {
+			throw error;
+		}
+
+		context = context.toLowerCase();
+
+		_context.requires[context][key] = modName;
+
+		return this;
+	};
+
+	// Config
+	this.setConfig = function(config) {
+		_config = config;
+		this.config = _config;
+	};
+
+	this.getConfig = function() {
+		return _config;
+	};
+
+	this.addConfig = function(key, value, context) {
+		var error = validateConfig(key, value, context);
+		if(error) {
+			throw error;
+		}
+
+		context = context.toLowerCase();
+
+		_config[context][key] = value;
+
+		return this;
+	};
+
+	// Other Methods
 
 	this.on = function(name, handler) {
 		if(!name) {
@@ -76,173 +159,6 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 		_events[name][handler.name.toLowerCase()] = handler;
 
 		return this; // for chaining
-	};
-
-	// Requires
-	this.require = function(varName, modName, context) {
-		var error = validateRequire(varName, modName, context);
-		if(error) {
-			throw error;
-		}
-
-		context = context.toLowerCase();
-
-		_requires[context][varName] = modName;
-
-		return this;
-
-	};
-
-	this.loadServerRequires = function() {
-		if (typeof process !== 'object' || process.browser) {
-			throw new WillowError(
-				'loadServerRequires can only be called from the server.',
-				{},
-				400,
-				'SERVERONLY'
-			);
-		}
-		var path = require('path');
-		var filePath = '';
-		for(var i in _requires.both) {
-			filePath = _requires.both[i];
-			if(filePath.charAt(0) === '.') {
-				filePath = path.resolve(
-					path.dirname(module.parent.parent.filename),
-					filePath
-				);
-			}
-			this.loadRequire(i, require(filePath));
-		}
-		for(var j in _requires.server) {
-			filePath = _requires.server[j];
-			if(filePath.charAt(0) === '.') {
-				filePath = path.resolve(
-					path.dirname(module.parent.parent.filename),
-					filePath
-				);
-			}
-			this.loadRequire(j, require(filePath));
-		}
-	};
-
-	this.setRequires = function(requires) {
-		_loadedRequires = requires;
-	};
-
-	this.getRequires = function() {
-		return _requires;
-	};
-
-	this.getLoadedRequires = function() {
-		return _loadedRequires;
-	};
-
-	this.loadRequire = function(varName, module) {
-		_loadedRequires[varName] = module;
-	};
-
-	/*
-	 * For duplicating the WillowState
-	 */
-	this.clone = function() {
-		return new WillowState(
-			_.cloneDeep(_contents),
-			_.cloneDeep(_events),
-			_.cloneDeep(_requires),
-			_.cloneDeep(_metadata),
-			_.cloneDeep(_loadedRequires),
-			_.cloneDeep(_.config)
-		);
-	};
-
-	// Metadata
-	this.setMetadata = function(fn) {
-		if(!_.isFunction(fn)) {
-			throw new WillowError(
-				'Argument must be a function',
-				400,
-				'NONFUNCTION'
-			);
-		}
-		_metadata = fn;
-		return this;
-	};
-	this.getMetadata = function(obj) {
-		return _metadata(obj);
-	};
-
-	// Config
-	this.setConfig = function(key, value, context) {
-		var error = validateConfig(key, value, context);
-		if(error) {
-			throw error;
-		}
-
-		context = context.toLowerCase();
-
-		_config[context][key] = value;
-
-		return this;
-	};
-
-	this.getConfig = function() {
-		return _config;
-	};
-
-	this.run = function(eventName, handler, eventObj, actualMethod, resolve, reject) {
-		eventName = eventName.toLowerCase();
-		if(!_events.hasOwnProperty(eventName)) {
-			return reject(new WillowError(
-				'Component has no event {{event}}.',
-				{event: eventName},
-				404,
-				'NOEVENT'
-			));
-		}
-		if(!_events[eventName].hasOwnProperty(handler)) {
-			return reject(new WillowError(
-				'Component has no handler {{event}}/{{handler}}.',
-				{event: eventName, handler: handler},
-				404,
-				'NOHANDLER'
-			));
-		}
-		if(_events[eventName][handler].method !== actualMethod.toLowerCase()) {
-			return reject(new WillowError(
-				'run(...) call expected {{expectedMethod}} but {{event}}/{{handler}} has method {{actualMethod}}.',
-				{
-					event: eventName,
-					handler: handler,
-					expectedMethod: _events[eventName][handler].method,
-					actualMethod: actualMethod
-				},
-				400,
-				'BADCALL'
-			));
-		}
-
-		return _events[eventName][handler].run(
-			eventObj,
-			// resolve
-			function(data) {
-				var result = {};
-				result[handler] = data;
-				return resolve(result);
-			},
-			// reject
-			reject
-		);
-	};
-
-	this.hasHandler = function(eventName, handler) {
-		if(!_events.hasOwnProperty(eventName)) {
-			return false;
-		}
-		if(!_events[eventName].hasOwnProperty(handler)) {
-			return false;
-		}
-		return true;
 	};
 
 	this.trigger = function(node, eventName, eventObj) {
@@ -314,7 +230,110 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 		}
 	};
 
-	// this.toString = require('./on');
+	this.clone = function() {
+		return new WillowState(
+			_.cloneDeep(_contents),
+			_.cloneDeep(_events),
+			_.cloneDeep(_metadata),
+			_.cloneDeep(_requires),
+			_.cloneDeep(_config)
+		);
+	};
+
+	this.run = function(eventName, handler, eventObj, actualMethod, resolve, reject) {
+		eventName = eventName.toLowerCase();
+		if(!_events.hasOwnProperty(eventName)) {
+			return reject(new WillowError(
+				'Component has no event {{event}}.',
+				{event: eventName},
+				404,
+				'NOEVENT'
+			));
+		}
+		if(!_events[eventName].hasOwnProperty(handler)) {
+			return reject(new WillowError(
+				'Component has no handler {{event}}/{{handler}}.',
+				{event: eventName, handler: handler},
+				404,
+				'NOHANDLER'
+			));
+		}
+		if(_events[eventName][handler].method !== actualMethod.toLowerCase()) {
+			return reject(new WillowError(
+				'run(...) call expected {{expectedMethod}} but {{event}}/{{handler}} has method {{actualMethod}}.',
+				{
+					event: eventName,
+					handler: handler,
+					expectedMethod: _events[eventName][handler].method,
+					actualMethod: actualMethod
+				},
+				400,
+				'BADCALL'
+			));
+		}
+
+		return _events[eventName][handler].run.call(
+			this,
+			eventObj,
+			// resolve
+			function(data) {
+				var result = {};
+				result[handler] = data;
+				return resolve(result);
+			},
+			// reject
+			reject
+		);
+	};
+
+	this.hasHandler = function(eventName, handler) {
+		if(!eventName || !handler) {
+			return false;
+		}
+
+		eventName = eventName.toLowerCase();
+
+		if(!_events.hasOwnProperty(eventName)) {
+			return false;
+		}
+		if(!_events[eventName].hasOwnProperty(handler)) {
+			return false;
+		}
+		return true;
+	};
+
+	// this.loadServerRequires = function() {
+	// 	if (typeof process !== 'object' || process.browser) {
+	// 		throw new WillowError(
+	// 			'loadServerRequires can only be called from the server.',
+	// 			{},
+	// 			400,
+	// 			'SERVERONLY'
+	// 		);
+	// 	}
+	// 	var path = require('path');
+	// 	var filePath = '';
+	// 	for(var i in _requires.both) {
+	// 		filePath = _requires.both[i];
+	// 		if(filePath.charAt(0) === '.') {
+	// 			filePath = path.resolve(
+	// 				path.dirname(module.parent.parent.filename),
+	// 				filePath
+	// 			);
+	// 		}
+	// 		this.loadRequire(i, require(filePath));
+	// 	}
+	// 	for(var j in _requires.server) {
+	// 		filePath = _requires.server[j];
+	// 		if(filePath.charAt(0) === '.') {
+	// 			filePath = path.resolve(
+	// 				path.dirname(module.parent.parent.filename),
+	// 				filePath
+	// 			);
+	// 		}
+	// 		this.loadRequire(j, require(filePath));
+	// 	}
+	// };
 };
 
 module.exports = WillowState;

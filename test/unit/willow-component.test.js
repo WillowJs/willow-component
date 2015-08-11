@@ -4,6 +4,280 @@
 var Willow = require('../../index.js');
 var TestUtils = require('react/addons').addons.TestUtils;
 describe('willow-component', function() {
+	describe('contents', function() {
+		it('should have a getContents method', function() {
+			var ComponentClass = Willow.createClass({});
+			expect(ComponentClass.prototype._willow.getContents).not.to.be.undefined;
+		});
+		it('should have a setContents method', function() {
+			var ComponentClass = Willow.createClass({});
+			expect(ComponentClass.prototype._willow.setContents).not.to.be.undefined;
+		});
+		it('should have contents property foo', function() {
+			var ComponentClass = Willow.createClass({
+				foo: 'bar'
+			});
+			expect(ComponentClass.prototype._willow.getContents().foo).to.equal('bar');
+		});
+		it('should be able to set the contents successfully', function() {
+			var ComponentClass = Willow.createClass({
+				foo: 'bar'
+			});
+			ComponentClass.prototype._willow.setContents({face: 'book'});
+			expect(ComponentClass.prototype._willow.getContents().foo).to.be.undefined;
+			expect(ComponentClass.prototype._willow.getContents().face).to.equal('book');
+		});
+	});
+
+	describe('events', function() {
+		it('should have a getEvents method', function() {
+			var ComponentClass = Willow.createClass({});
+			expect(ComponentClass.prototype._willow.getEvents).not.to.be.undefined;
+		});
+		it('should have a setEvents method', function() {
+			var ComponentClass = Willow.createClass({});
+			expect(ComponentClass.prototype._willow.setEvents).not.to.be.undefined;
+		});
+		it('should have an on method', function() {
+			var ComponentClass = Willow.createClass({});
+			expect(ComponentClass.prototype._willow.on).not.to.be.undefined;
+			expect(ComponentClass.on).not.to.be.undefined;
+		});
+		it('should have no events by default', function() {
+			var ComponentClass = Willow.createClass({
+				foo: 'bar'
+			});
+			expect(ComponentClass.prototype._willow.getEvents()).to.deep.equal({});
+		});
+		it('should keep track of added events', function() {
+			var ComponentClass = Willow.createClass({
+				foo: 'bar'
+			}).on('test', {
+				name: 'hello',
+				method: 'get',
+				dependencies: [],
+				run: function(){}
+			});
+			expect(ComponentClass.prototype._willow.getEvents().test).not.to.be.undefined;
+		});
+		it('should be able to set the events object successfully', function() {
+			var ComponentClass = Willow.createClass({
+				foo: 'bar'
+			}).on('test', {
+				name: 'hello',
+				method: 'get',
+				dependencies: [],
+				run: function(){}
+			});
+			ComponentClass.prototype._willow.setEvents({foo: 'bar'});
+			expect(ComponentClass.prototype._willow.getEvents().test).to.be.undefined;
+			expect(ComponentClass.prototype._willow.getEvents().foo).to.equal('bar');
+		});
+	});
+
+	describe('metadata', function() {
+		it('should have a metadata method', function() {
+			expect(Willow.createClass({}).metadata).not.to.be.undefined;
+		});
+		it('should have a getMetadata method', function() {
+			expect(Willow.createClass({}).getMetadata).not.to.be.undefined;
+			expect(Willow.createClass({}).prototype._willow.getMetadata).not.to.be.undefined;
+		});
+		it('should have a setMetadata method', function() {
+			expect(Willow.createClass({}).prototype._willow.setMetadata).not.to.be.undefined;
+		});
+		it('should return a undefined when no metadata is set', function() {
+			var comp = Willow.createClass({});
+			expect(comp.getMetadata()('hello')).to.be.undefined;
+		});
+		it('should return the correct metadata object', function() {
+			var comp = Willow.createClass({}).metadata(function(test) {
+				return {
+					value: test
+				};
+			});
+			expect(comp.getMetadata()('hello')).to.deep.equal({value: 'hello'});
+			expect(comp.getMetadata()('yes')).to.deep.equal({value: 'yes'});
+		});
+	});
+
+	describe('requires', function() {
+		it('should have a require method', function() {
+			expect(Willow.createClass({}).require).not.to.be.undefined;
+		});
+		it('should have a getRequires method', function() {
+			expect(Willow.createClass({}).prototype._willow.getRequires).not.to.be.undefined;
+		});
+		it('should have a setRequires method', function() {
+			expect(Willow.createClass({}).prototype._willow.setRequires).not.to.be.undefined;
+		});
+		it('should have no requires by default', function() {
+			var ComponentClass = Willow.createClass({});
+			expect(ComponentClass.prototype._willow.getRequires()).to.deep.equal({});
+		});
+		it('should set requires successfully', function() {
+			var ComponentClass = Willow.createClass({});
+			ComponentClass.prototype._willow.setRequires({foo: 'bar'});
+			expect(ComponentClass.prototype._willow.getRequires().foo).to.equal('bar');
+		});
+		it('should be able to access requires on the node', function() {
+			var ComponentClass = Willow.createClass({});
+			ComponentClass.prototype._willow.setRequires({foo: 'bar'});
+			var node = utils.renderIntoDocument(<ComponentClass name="parent" />);
+			expect(node.requires.foo).to.equal('bar');
+		});
+		it('should return itself for method chaining', function() {
+			var CompClass = Willow.createClass({});
+			expect(CompClass.require('_', 'lodash', 'server')).to.equal(CompClass);
+		});
+		it('should throw and error if no var name is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require(); }).to.throw({
+				message: 'A variable name is required',
+				status: 400,
+				id: 'NOVARNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if an invalid var name is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require(true); }).to.throw({
+				message: 'Variable names must be strings',
+				status: 400,
+				id: 'BADVARNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if no module name is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require('hello'); }).to.throw({
+				message: 'A module to include must be specified',
+				status: 400,
+				id: 'NOMODNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if an invalid module name is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require('hello', 7); }).to.throw({
+				message: 'Module names must be strings',
+				status: 400,
+				id: 'BADMODNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if no context is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require('hello', 'world'); }).to.throw({
+				message: 'A context is require ("client" or "server" or "both")',
+				status: 400,
+				id: 'NOCONTEXT',
+				params: {}
+			});
+		});
+		it('should throw and error if a bad context is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require('hello', 'world', []); }).to.throw({
+				message: 'Context must be a string',
+				status: 400,
+				id: 'BADCONTEXT',
+				params: {}
+			});
+		});
+		it('should throw and error if an invalid context is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require('hello', 'world', []); }).to.throw({
+				message: 'Context must be either "client", "server" or "both"',
+				status: 400,
+				id: 'INVALIDCONTEXT',
+				params: {}
+			});
+		});
+		it('should work when valid params are passed in', function() {
+			var CompClass = Willow.createClass({});
+			expect(CompClass.require('foo', 'bar', 'client')).to.equal(CompClass);
+			expect(CompClass.require('faz', 'boz', 'server')).to.equal(CompClass);
+			expect(CompClass.require('face', 'book', 'both')).to.equal(CompClass);
+		});
+	});
+
+	describe('config', function() {
+		it('should have a config method', function() {
+			expect(Willow.createClass({}).config).not.to.be.undefined;
+		});
+		it('should have a getConfig method', function() {
+			expect(Willow.createClass({}).prototype._willow.getConfig).not.to.be.undefined;
+		});
+		it('should have a setConfig method', function() {
+			expect(Willow.createClass({}).prototype._willow.setConfig).not.to.be.undefined;
+		});
+		it('should have no configs by default', function() {
+			var ComponentClass = Willow.createClass({});
+			expect(ComponentClass.prototype._willow.getConfig()).to.deep.equal({});
+		});
+		it('should set config successfully', function() {
+			var ComponentClass = Willow.createClass({});
+			ComponentClass.prototype._willow.setConfig({foo: 'bar'});
+			expect(ComponentClass.prototype._willow.getConfig().foo).to.equal('bar');
+		});
+		it('should be able to access config on the node', function() {
+			var ComponentClass = Willow.createClass({});
+			ComponentClass.prototype._willow.setConfig({foo: 'bar'});
+			var node = utils.renderIntoDocument(<ComponentClass name="parent" />);
+			expect(node.config.foo).to.equal('bar');
+		});
+		it('should throw and error if no key is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.config(); }).to.throw({
+				message: 'A key is required',
+				status: 400,
+				id: 'NOVARNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if an invalid var name is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.config(true); }).to.throw({
+				message: 'Keys must be strings',
+				status: 400,
+				id: 'BADVARNAME',
+				params: {}
+			});
+		});
+		it('should throw and error if no context is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require('hello', 'world'); }).to.throw({
+				message: 'A context is require ("client" or "server" or "both")',
+				status: 400,
+				id: 'NOCONTEXT',
+				params: {}
+			});
+		});
+		it('should throw and error if a bad context is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require('hello', 'world', []); }).to.throw({
+				message: 'Context must be a string',
+				status: 400,
+				id: 'BADCONTEXT',
+				params: {}
+			});
+		});
+		it('should throw and error if an invalid context is specified', function() {
+			var CompClass = Willow.createClass({});
+			expect(function() { CompClass.require('hello', 'world', []); }).to.throw({
+				message: 'Context must be either "client", "server" or "both"',
+				status: 400,
+				id: 'INVALIDCONTEXT',
+				params: {}
+			});
+		});
+		it('should work when valid params are passed in', function() {
+			var CompClass = Willow.createClass({});
+			expect(CompClass.require('foo', 'bar', 'client')).to.equal(CompClass);
+			expect(CompClass.require('faz', 'boz', 'server')).to.equal(CompClass);
+			expect(CompClass.require('face', 'book', 'both')).to.equal(CompClass);
+		});
+	});
 
 	describe('on', function() {
 		it('should exist on classes', function() {
@@ -346,104 +620,39 @@ describe('willow-component', function() {
 		});
 	});
 
-	/*
-	describe('toString', function() {
-		var Comp = Willow.createClass({
-			render: function() {
-				return (<h1>Hello World</h1>);
-			}
-		})
-		.on('baz', {
-			name: 'hello',
-			dependencies: [],
-			run: function(e, resolve, reject) {
-				var pieces = e.echo.split('-');
-				var obj = {};
-				obj[pieces[0]] = pieces[1];
-				resolve(obj);
-			}
-		});
-
+	describe('clone', function() {
 		it('should exist', function() {
-			expect(Comp.toString).not.to.be.undefined;
+			expect(Willow.createClass().prototype._willow.clone).not.to.be.undefined;
 		});
-		it('should return a valid javascript object', function() {
-			var obj;
-			eval('obj = '+Comp.toString());
-			console.log(obj);
-			expect(obj.contents).not.to.be.undefined;
-			expect(obj.contents.render).not.to.be.undefined;
-		});
-		it('should convert events properly', function() {
-			var Comp2 = Willow.createClass({
-				render: function() {
-					return (<h1>Hello World</h1>);
-				}
-			})
-			.require('_', 'lodash', 'server')
-			.on('event1', {
-				name: 'event1.test',
-				method: 'local',
-				dependencies: [],
-				run: function() {
+		it('should duplicate the existing state', function() {
+			var ComponentClass = Willow.createClass({foo1: 'bar1'});
+			var state = ComponentClass.prototype._willow;
+			state.setEvents({foo2: 'bar2'});
+			state.setMetadata({foo3: 'bar3'});
+			state.setRequires({foo4: 'bar4'});
+			state.setConfig({foo5: 'bar5'});
 
-				}
-			})
-			.on('event1', {
-				name: 'event1.anotherTest',
-				method: 'local',
-				dependencies: ['event1.test'],
-				run: function() {
+			var newState = state.clone();
 
-				}
-			});
+			expect(newState.getContents()).to.deep.equal(state.getContents());
+			expect(newState.getEvents()).to.deep.equal(state.getEvents());
+			expect(newState.getMetadata()).to.deep.equal(state.getMetadata());
+			expect(newState.getRequires()).to.deep.equal(state.getRequires());
+			expect(newState.getConfig()).to.deep.equal(state.getConfig());
 
-			var obj;
-			eval('obj = '+Comp2.toString());
-			expect(obj.events).not.to.be.undefined;
-			expect(obj.events.event1).not.to.be.undefined;
-			expect(obj.events.event1['event1.test']).not.to.be.undefined;
-			expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
-			expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
-			expect(obj.metadata).not.to.be.undefined;
-			expect(obj.requires).not.to.be.undefined;
-			expect(obj.requires.server._).to.equal('lodash');
-		});
-		it('should only should be able to only show local events', function() {
-			var Comp2 = Willow.createClass({
-				render: function() {
-					return (<h1>Hello World</h1>);
-				}
-			})
-			.on('event1', {
-				name: 'event1.test',
-				method: 'local',
-				dependencies: [],
-				run: function() {
+			state.setContents({baz1: 'bop1'});
+			state.setEvents({baz2: 'bop2'});
+			state.setMetadata({baz3: 'bop3'});
+			state.setRequires({baz4: 'bop4'});
+			state.setConfig({baz5: 'bop5'});
 
-				}
-			})
-			.on('event1', {
-				name: 'event1.anotherTest',
-				method: 'post',
-				dependencies: ['event1.test'],
-				run: function() {
-
-				}
-			});
-
-			var obj;
-			eval('obj = '+Comp2.toString(true));
-			expect(obj.events).not.to.be.undefined;
-			expect(obj.events.event1).not.to.be.undefined;
-			expect(obj.events.event1['event1.test']).not.to.be.undefined;
-			expect(obj.events.event1['event1.test'].name).not.to.be.undefined;
-			expect(obj.events.event1['event1.test'].name).to.equal('event1.test');
-			expect(obj.events.event1['event1.anothertest']).to.be.undefined;
-			expect(obj.metadata).not.to.be.undefined;
+			expect(newState.getContents()).not.to.deep.equal(state.getContents());
+			expect(newState.getEvents()).not.to.deep.equal(state.getEvents());
+			expect(newState.getMetadata()).not.to.deep.equal(state.getMetadata());
+			expect(newState.getRequires()).not.to.deep.equal(state.getRequires());
+			expect(newState.getConfig()).not.to.deep.equal(state.getConfig());
 		});
 	});
-	*/
 
 	describe('run', function() {
 		var Comp = Willow.createClass({
@@ -536,117 +745,24 @@ describe('willow-component', function() {
 		});
 	});
 
-	describe('getMetadata', function() {
-		it('should exist', function() {
-			expect(Willow.createClass().getMetadata).not.to.be.undefined;
+	describe('hasHandler', function() {
+		var CompClass = Willow.createClass({}).on('test', {
+			name: 'hello',
+			method: 'get',
+			dependencies: [],
+			run: function(){}
 		});
-		it('should return a undefined when no metadata is set', function() {
-			var comp = Willow.createClass({});
-			expect(comp.getMetadata('hello')).to.be.undefined;
-		});
-		it('should return the correct metadata object', function() {
-			var comp = Willow.createClass({}).setMetadata(function(test) {
-				return {
-					value: test
-				};
-			});
-			expect(comp.getMetadata('hello')).to.deep.equal({value: 'hello'});
-		});
-	});
 
-	describe('setMetadata', function() {
-		it('should exist', function() {
-			expect(Willow.createClass().setMetadata).not.to.be.undefined;
+		it('should return true for valid handlers', function() {
+			expect(CompClass.prototype._willow.hasHandler('test', 'hello')).to.be.true;
+			expect(CompClass.prototype._willow.hasHandler('tesT', 'hello')).to.be.true;
 		});
-		it('should return willow state when it is called', function() {
-			var comp = Willow.createClass({});
-			expect(comp.setMetadata(function(){}).setMetadata).not.to.be.undefined;
-		});
-	});
 
-	describe('require', function() {
-		it('should exist', function() {
-			expect(Willow.createClass({}).require).not.to.be.undefined;
-		});
-		it('should return itself for method chaining', function() {
-			var CompClass = Willow.createClass({});
-			expect(CompClass.require('_', 'lodash', 'server')).to.equal(CompClass);
-		});
-		it('should throw and error if no var name is specified', function() {
-			var CompClass = Willow.createClass({});
-			expect(function() { CompClass.require(); }).to.throw({
-				message: 'A variable name is required',
-				status: 400,
-				id: 'NOVARNAME',
-				params: {}
-			});
-		});
-		it('should throw and error if an invalid var name is specified', function() {
-			var CompClass = Willow.createClass({});
-			expect(function() { CompClass.require(true); }).to.throw({
-				message: 'Variable names must be strings',
-				status: 400,
-				id: 'BADVARNAME',
-				params: {}
-			});
-		});
-		it('should throw and error if no module name is specified', function() {
-			var CompClass = Willow.createClass({});
-			expect(function() { CompClass.require('hello'); }).to.throw({
-				message: 'A module to include must be specified',
-				status: 400,
-				id: 'NOMODNAME',
-				params: {}
-			});
-		});
-		it('should throw and error if an invalid module name is specified', function() {
-			var CompClass = Willow.createClass({});
-			expect(function() { CompClass.require('hello', 7); }).to.throw({
-				message: 'Module names must be strings',
-				status: 400,
-				id: 'BADMODNAME',
-				params: {}
-			});
-		});
-		it('should throw and error if no context is specified', function() {
-			var CompClass = Willow.createClass({});
-			expect(function() { CompClass.require('hello', 'world'); }).to.throw({
-				message: 'A context is require ("client" or "server" or "both")',
-				status: 400,
-				id: 'NOCONTEXT',
-				params: {}
-			});
-		});
-		it('should throw and error if a bad context is specified', function() {
-			var CompClass = Willow.createClass({});
-			expect(function() { CompClass.require('hello', 'world', []); }).to.throw({
-				message: 'Context must be a string',
-				status: 400,
-				id: 'BADCONTEXT',
-				params: {}
-			});
-		});
-		it('should throw and error if an invalid context is specified', function() {
-			var CompClass = Willow.createClass({});
-			expect(function() { CompClass.require('hello', 'world', []); }).to.throw({
-				message: 'Context must be either "client", "server" or "both"',
-				status: 400,
-				id: 'INVALIDCONTEXT',
-				params: {}
-			});
-		});
-		it('should work when valid params are passed in', function() {
-			var CompClass = Willow.createClass({});
-			expect(CompClass.require('foo', 'bar', 'client')).to.equal(CompClass);
-			expect(CompClass.require('faz', 'boz', 'server')).to.equal(CompClass);
-			expect(CompClass.require('face', 'book', 'both')).to.equal(CompClass);
-		});
-		it('should load the proper required modules before the component mounts on the server', function() {
-			var CompClass = Willow.createClass({}).require('_', 'lodash', 'server');
-			var compNode = utils.renderIntoDocument(<CompClass />);
-			expect(compNode.requires).not.to.be.undefined;
-			expect(compNode.requires._).not.to.be.undefined;
-			expect(compNode.requires._.isFunction).not.to.be.undefined;
+		it('should return alse for invalid handlers', function() {
+			expect(CompClass.prototype._willow.hasHandler('test', 'HELLOp')).to.be.false;
+			expect(CompClass.prototype._willow.hasHandler('testd', 'hello')).to.be.false;
+			expect(CompClass.prototype._willow.hasHandler('foo', 'bar')).to.be.false;
+			expect(CompClass.prototype._willow.hasHandler('test', 'Hello')).to.be.false;
 		});
 	});
 });

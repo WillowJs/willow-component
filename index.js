@@ -56,28 +56,29 @@ function createClass(_contents) {
 				};
 			}
 
-			if(isNode) {
-				var config = instanceState.getConfig();
-				this.config = {};
-				for(var i in config.both) {
-					this.config[i] = config.both[i];
-				}
-				for(var j in config.server) {
-					this.config[j] = config.server[j];
-				}
-				instanceState.loadServerRequires();
-			}
+			// if(isNode) {
+			// 	var config = instanceState.getConfig();
+			// 	this.config = {};
+			// 	for(var i in config.both) {
+			// 		this.config[i] = config.both[i];
+			// 	}
+			// 	for(var j in config.server) {
+			// 		this.config[j] = config.server[j];
+			// 	}
+			// 	instanceState.loadServerRequires();
+			// }
 
-			this.requires = instanceState.getLoadedRequires();
+			this.requires = instanceState.getRequires();
+			this.config = instanceState.getConfig();
 			this.trigger = trigger;
-			this.setMetadata = instanceState.setMetadata;
+			this.metadata = instanceState.addMetadata;
 			this.getMetadata = instanceState.getMetadata;
 			this.hasHandler = instanceState.hasHandler;
 
-			ChildClass.prototype.requires = instanceState.getLoadedRequires();
+			ChildClass.prototype.requires = instanceState.getRequires();
 			ChildClass.prototype.config = this.config;
 			ChildClass.prototype.trigger = trigger;
-			ChildClass.prototype.setMetadata = instanceState.setMetadata;
+			ChildClass.prototype.metadata = instanceState.addMetadata;
 			ChildClass.prototype.getMetadata = instanceState.getMetadata;
 			ChildClass.prototype.hasHandler = instanceState.hasHandler;
 		},
@@ -89,10 +90,11 @@ function createClass(_contents) {
 	var classState = new WillowState(_contents);
 
 	ParentClass.on = classState.on;
-	ParentClass.require = classState.require;
+	ParentClass.require = classState.addRequire;
+	ParentClass.config = classState.addConfig;
 	ParentClass.setConfig = classState.setConfig;
+	ParentClass.metadata = classState.addMetadata;
 	ParentClass.getMetadata = classState.getMetadata;
-	ParentClass.setMetadata = classState.setMetadata;
 	ParentClass.run = classState.run;
 	ParentClass.toString = classState.toString;
 	ParentClass.hasHandler = classState.hasHandler;

@@ -7,7 +7,7 @@ module.exports = function(key, value, context) {
 		return new WillowError(
 			'A key is required',
 			400,
-			'NOVARNAME'
+			'NOKEY'
 		);
 	}
 
@@ -15,7 +15,7 @@ module.exports = function(key, value, context) {
 		return new WillowError(
 			'Keys must be strings',
 			400,
-			'BADVARNAME'
+			'BADKEY'
 		);
 	}
 
@@ -23,7 +23,7 @@ module.exports = function(key, value, context) {
 		return new WillowError(
 			'A value is required',
 			400,
-			'NOMODNAME'
+			'NOVALUE'
 		);
 	}
 
