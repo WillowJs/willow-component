@@ -157,11 +157,12 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 	};
 
 	this.require = function(varName, modName, context) {
-		context = context.toLowerCase();
 		var error = validateRequire(varName, modName, context);
 		if(error) {
 			throw error;
 		}
+
+		context = context.toLowerCase();
 
 		_requires[context][varName] = modName;
 
@@ -170,11 +171,12 @@ var WillowState = function(_contents, _events, _requires, _metadata, _loadedRequ
 	};
 
 	this.setConfig = function(key, value, context) {
-		context = context.toLowerCase();
 		var error = validateConfig(key, value, context);
 		if(error) {
 			throw error;
 		}
+
+		context = context.toLowerCase();
 
 		_config[context][key] = value;
 
