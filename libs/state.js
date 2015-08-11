@@ -309,39 +309,6 @@ var WillowState = function(_contents, _events, _metadata, _requires, _config) {
 		}
 		return true;
 	};
-
-	// this.loadServerRequires = function() {
-	// 	if (typeof process !== 'object' || process.browser) {
-	// 		throw new WillowError(
-	// 			'loadServerRequires can only be called from the server.',
-	// 			{},
-	// 			400,
-	// 			'SERVERONLY'
-	// 		);
-	// 	}
-	// 	var path = require('path');
-	// 	var filePath = '';
-	// 	for(var i in _requires.both) {
-	// 		filePath = _requires.both[i];
-	// 		if(filePath.charAt(0) === '.') {
-	// 			filePath = path.resolve(
-	// 				path.dirname(module.parent.parent.filename),
-	// 				filePath
-	// 			);
-	// 		}
-	// 		this.loadRequire(i, require(filePath));
-	// 	}
-	// 	for(var j in _requires.server) {
-	// 		filePath = _requires.server[j];
-	// 		if(filePath.charAt(0) === '.') {
-	// 			filePath = path.resolve(
-	// 				path.dirname(module.parent.parent.filename),
-	// 				filePath
-	// 			);
-	// 		}
-	// 		this.loadRequire(j, require(filePath));
-	// 	}
-	// };
 };
 
 module.exports = WillowState;
