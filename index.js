@@ -20,11 +20,6 @@ var WillowState = require('./libs/state');
  * Component Child Instance
  */
 
-var isNode = false;
-if (typeof process === 'object') {
-	isNode = !process.browser;
-}
-
 module.exports = {
 	createClass: createClass
 };
@@ -55,18 +50,6 @@ function createClass(_contents) {
 					return instanceState.trigger(self, eventName, eventObj);
 				};
 			}
-
-			// if(isNode) {
-			// 	var config = instanceState.getConfig();
-			// 	this.config = {};
-			// 	for(var i in config.both) {
-			// 		this.config[i] = config.both[i];
-			// 	}
-			// 	for(var j in config.server) {
-			// 		this.config[j] = config.server[j];
-			// 	}
-			// 	instanceState.loadServerRequires();
-			// }
 
 			this.requires = instanceState.getRequires();
 			this.config = instanceState.getConfig();

@@ -1,6 +1,6 @@
 'use strict';
 var WillowError = require('willow-error');
-var _ = require('lodash');
+var _ = require('../lodash/lodash.custom');
 var validator = require('validator');
 module.exports = function(varName, modName, context) {
 	if(!varName) {

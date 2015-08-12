@@ -1,5 +1,5 @@
 var validator = require('validator');
-var _ = require('lodash');
+var _ = require('../lodash/lodash.custom');
 module.exports = function(handler) {
 	if(!handler.name) {
 		return new WillowError(
