@@ -51,14 +51,14 @@ function createClass(_contents) {
 				};
 			}
 
-			this.requires = instanceState.getRequires();
+			this.require = instanceState.getRequires();
 			this.config = instanceState.getConfig();
 			this.trigger = trigger;
 			this.metadata = instanceState.addMetadata;
 			this.getMetadata = instanceState.getMetadata;
 			this.hasHandler = instanceState.hasHandler;
 
-			ChildClass.prototype.requires = instanceState.getRequires();
+			ChildClass.prototype.require = instanceState.getRequires();
 			ChildClass.prototype.config = this.config;
 			ChildClass.prototype.trigger = trigger;
 			ChildClass.prototype.metadata = instanceState.addMetadata;
