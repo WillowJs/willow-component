@@ -796,18 +796,4 @@ describe('willow-component', function() {
 			expect(CompClass.prototype._willow.hasHandler('test', 'Hello')).to.be.false;
 		});
 	});
-
-	describe('getDir', function() {
-		var CompClass = require('../fixtures/components/test/index.js');
-		it('should exist', function() {
-			expect(CompClass.getDir).not.to.be.undefined;
-		});
-		it('should return the directory where the component is located', function() {
-			var pieces = CompClass.getDir().split('/');
-			expect(pieces[pieces.length-1]).to.equal('test');
-			expect(pieces[pieces.length-2]).to.equal('components');
-			expect(pieces[pieces.length-3]).to.equal('fixtures');
-			expect(pieces[pieces.length-4]).to.equal('test');
-		});
-	});
 });

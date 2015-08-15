@@ -83,10 +83,6 @@ function createClass(_contents) {
 	};
 	ParentClass.toString = classState.toString;
 	ParentClass.hasHandler = classState.hasHandler;
-	ParentClass.getDir = function() {
-		var path = require('path');
-		return path.dirname(module.parent.filename);
-	};
 
 	ParentClass.prototype._willow = classState;
 
