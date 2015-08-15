@@ -124,7 +124,7 @@ describe('willow-component', function() {
 			var ComponentClass = Willow.createClass({});
 			ComponentClass.prototype._willow.setRequires({foo: 'bar'});
 			var node = utils.renderIntoDocument(<ComponentClass name="parent" />);
-			expect(node.requires.foo).to.equal('bar');
+			expect(node.require.foo).to.equal('bar');
 		});
 		it('should return itself for method chaining', function() {
 			var CompClass = Willow.createClass({});
@@ -766,7 +766,7 @@ describe('willow-component', function() {
 				},
 				'local',
 				function(data) {
-					expect(data.hello).to.deep.equal({ hello: 'world' });
+					expect(data).to.deep.equal({ hello: 'world' });
 					done();
 				},
 				function(err) {

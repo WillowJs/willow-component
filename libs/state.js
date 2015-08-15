@@ -283,13 +283,7 @@ var WillowState = function(_contents, _events, _metadata, _requires, _config) {
 		return _events[eventName][handler].run.call(
 			this,
 			eventObj,
-			// resolve
-			function(data) {
-				var result = {};
-				result[handler] = data;
-				return resolve(result);
-			},
-			// reject
+			resolve,
 			reject
 		);
 	};
