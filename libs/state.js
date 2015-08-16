@@ -199,6 +199,7 @@ var WillowState = function(_contents, _events, _metadata, _requires, _config) {
 
 		eventName = eventName.toLowerCase();
 		eventObj = eventObj || {};
+		eventObj.results = eventObj.results || {};
 
 		function eventComplete(err, data) {
 			eventObj.results = data;
@@ -208,7 +209,7 @@ var WillowState = function(_contents, _events, _metadata, _requires, _config) {
 			if(node.props.trigger) {
 				if(node.props.events && node.props.events.hasOwnProperty(eventName)) {
 					if(node.props.events[eventName].sync) {
-						node.props.trigger.call(node, eventName)(eventObj);
+						node.props.trigger(eventName)(eventObj);
 					}
 				}
 			}
