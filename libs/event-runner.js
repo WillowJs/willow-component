@@ -15,7 +15,7 @@ module.exports = function(handler, eventObj) {
 	// Add the function to run
 	returnArray.push(function(cb, results) {
 		var eventObjCopy = _.cloneDeep(eventObj);
-		eventObjCopy.results = results;
+		_.assign(eventObjCopy.results, results);
 		handler.run.call(
 			self,
 			eventObjCopy,
